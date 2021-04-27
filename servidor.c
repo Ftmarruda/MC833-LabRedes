@@ -41,14 +41,18 @@ int main(){
 
     signal = addSkill("banana@example.com", "JavaScript");
 
+    //signal = listAllProfiles();
 
-    signal = listAllProfiles();
+    signal = removeProfile("banana@example.com");
+    signal = removeProfile("gabriel@example.com");
+
 
     //signal = readProfile("felipe@example.com");
     //signal = listProfilesBasedOnGraduationYear("2022");
     //signal = listProfilesBasedOnSkill("Botar o pé atrás da cabeça");
     //signal = listProfilesBasedOnEducation("Counter Strike University");
-    //signal = removeProfile("banana@example.com");
+    
+    
 
     //if error
     if (!signal) {
@@ -84,7 +88,7 @@ bool createProfile (char email[30], char name[30], char surname[30], char addres
     //Query
 
     char sql[200];
-    strcpy(sql, "INSERT INTO Profiles VALUES('");
+    strcpy(sql, "INSERT OR IGNORE INTO Profiles VALUES('");
     strcat(sql, email);
     strcat(sql, "', '");
     strcat(sql, name);
@@ -137,7 +141,7 @@ bool addProfessionalExperience(char email[30], char professionalExperience[100])
     //Query
 
     char sql[200];
-    strcpy(sql, "INSERT INTO Experiences VALUES(NULL, '");
+    strcpy(sql, "INSERT OR IGNORE INTO Experiences VALUES(NULL, '");
     strcat(sql, email);
     strcat(sql, "', '");
     strcat(sql, professionalExperience);
@@ -178,7 +182,7 @@ bool addSkill(char email[30], char skill[100]){
     //Query 1
 
     sql = malloc(200*sizeof(char));
-    strcpy(sql, "INSERT INTO Skills VALUES('");
+    strcpy(sql, "INSERT OR IGNORE INTO Skills VALUES('");
     strcat(sql, skill);
     strcat(sql, "');");
 
@@ -197,11 +201,14 @@ bool addSkill(char email[30], char skill[100]){
 
     //Query 2
     sql = malloc(200*sizeof(char));;
-    strcpy(sql, "INSERT INTO Profiles_Skills VALUES('");
+    strcpy(sql, "INSERT OR IGNORE INTO Profiles_Skills VALUES('");
     strcat(sql, email);
     strcat(sql, "', '");
     strcat(sql, skill);
     strcat(sql, "');");
+
+
+    strcat(sql, "");
 
     sqlite3_exec(db, sql, 0, 0, &err_msg);
 
