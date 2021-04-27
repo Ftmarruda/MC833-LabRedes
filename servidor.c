@@ -25,14 +25,30 @@ int main(){
     sqlite3 *db;
     char *err_msg = 0;
     
-    //signal = createProfile("felipe@example.com", "Felipe", "Tiago", "Disneyland, Orlando", "Counter Strike University", "2022");
-    //signal = addProfessionalExperience("banana@example.com", "Trabalhei por dois anos na Conpec Corporation");
-    //signal = addSkill("felipe@example.com","Botar o pé atrás da cabeça");
-    //signal = listAllProfiles();
+    signal = createProfile("felipe@example.com", "Felipe", "Tiago", "Disneyland, Orlando", "Counter Strike University", "2022");
+    signal = createProfile("gabriel@example.com", "Gabriel", "Silveira", "Unicamp, Barão Geraldo", "Counter Strike University", "2022");
+
+    signal = addProfessionalExperience("banana@example.com", "Trabalhei por dois anos na Conpec Corporation");
+    signal = addProfessionalExperience("felipe@example.com", "Faço cerveja");
+    signal = addProfessionalExperience("gabriel@example.com", "Sou coach");
+
+    signal = addSkill("felipe@example.com", "HTML");
+    signal = addSkill("felipe@example.com", "CSS");
+
+    signal = addSkill("gabriel@example.com", "HTML");
+    signal = addSkill("gabriel@example.com", "SQL");
+    signal = addSkill("gabriel@example.com", "JavaScript");
+
+    signal = addSkill("banana@example.com", "JavaScript");
+
+
+    signal = listAllProfiles();
+
     //signal = readProfile("felipe@example.com");
     //signal = listProfilesBasedOnGraduationYear("2022");
     //signal = listProfilesBasedOnSkill("Botar o pé atrás da cabeça");
-    signal = listProfilesBasedOnEducation("Counter Strike University");
+    //signal = listProfilesBasedOnEducation("Counter Strike University");
+    //signal = removeProfile("banana@example.com");
 
     //if error
     if (!signal) {
@@ -162,7 +178,7 @@ bool addSkill(char email[30], char skill[100]){
     //Query 1
 
     sql = malloc(200*sizeof(char));
-    strcpy(sql, "INSERT INTO Skills VALUES(NULL, '");
+    strcpy(sql, "INSERT INTO Skills VALUES('");
     strcat(sql, skill);
     strcat(sql, "');");
 
@@ -428,6 +444,42 @@ bool readProfile(char *email){
 //false: não existe nenhum perfil vinculado ao e-mail
 //retorno: o struct Profile vinculado ao perfil removido
 bool removeProfile(char *email){
+    
+    sqlite3 *db;
+    char *err_msg = 0;
+    
+    int rc = sqlite3_open("app.db", &db);
+    
+    if (rc != SQLITE_OK) {
+        
+        fprintf(stderr, "Cannot open database: %s\n", 
+                sqlite3_errmsg(db));
+        sqlite3_close(db);
+        
+        return false;
+    }
+    
+    char sql[200];
+    strcpy(sql, "DELETE FROM Profiles WHERE Email == '");
+    strcat(sql, email);
+    strcat(sql, "';");
+
+        
+    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+    
+    if (rc != SQLITE_OK ) {
+        
+        fprintf(stderr, "Failed to select data\n");
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        
+        return false;
+    } 
+    
+    sqlite3_close(db);
+    
     return true;
 
 }
