@@ -1,31 +1,10 @@
-/*
- *
- *
- * Comandos a serem executados pelo servidor
- *
- *
- */
 #include <stdlib.h>
 #include <sqlite3.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 
-//Structs
-
-typedef struct Profile {
-    char email[30];
-    char name[30];
-    char surname[30];
-    char address[45];
-    char course[30];
-    char courseCompletionYear[4];
-    char *professionalExperience[300]; //vetor de string
-    char *skill[300]; //vetor de strings
-} Profile;
-
 //Protótipos
-
 bool createProfile(char email[30], char name[30], char surname[30], char address[100], char education[100], char graduationYear[4]);
 bool addProfessionalExperience(char email[30], char professionalExperience[100]);
 bool addSkill(char email[30], char skill[100]);
@@ -33,8 +12,8 @@ bool listProfilesBasedOnSkill(char skill[100]);
 bool listProfilesBasedOnCourse(char course[30]);
 bool listProfilesBasedOnCourseCompletionYear(char courseCompletionYear[4]);
 bool listAllProfiles();
-Profile readProfile(char *email); //FUNÇÃO PRIORITÁRIA - FAZER PRIMEIRO
-Profile removeProfile(char *email);
+bool readProfile(char *email);
+bool removeProfile(char *email);
 
 int callback(void *, int, char **, char **);
 
@@ -49,8 +28,9 @@ int main(){
     //signal = createProfile("felipe@example.com", "Felipe", "Tiago", "Disneyland, Orlando", "Counter Strike University", "2022");
     //signal = addProfessionalExperience("banana@example.com", "Trabalhei por dois anos na Conpec Corporation");
     //signal = addSkill("banana@example.com","Botar o pé atrás da cabeça");
-    signal = listAllProfiles();
-    
+    //signal = listAllProfiles();
+    readProfile("felipe@example.com");
+
     //if error
     if (!signal) {
         return 1;
@@ -291,9 +271,44 @@ bool listAllProfiles(){
 //false: não existe nenhum perfil vinculado ao e-mail
 //retorno: o struct Profile vinculado ao perfil lido
 
-Profile readProfile(char *email){
-    Profile profile;
-    return profile;
+bool readProfile(char *email){
+
+    sqlite3 *db;
+    char *err_msg = 0;
+    
+    int rc = sqlite3_open("app.db", &db);
+    
+    if (rc != SQLITE_OK) {
+        
+        fprintf(stderr, "Cannot open database: %s\n", 
+                sqlite3_errmsg(db));
+        sqlite3_close(db);
+        
+        return false;
+    }
+    
+    char sql[200];
+    strcpy(sql, "SELECT * FROM Profiles WHERE Email == '");
+    strcat(sql, email);
+    strcat(sql, "';");
+
+        
+    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+    
+    if (rc != SQLITE_OK ) {
+        
+        fprintf(stderr, "Failed to select data\n");
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        
+        return false;
+    } 
+    
+    sqlite3_close(db);
+    
+    return true;
 }
 
 //remover um perfil a partir de seu identificador (email). 
@@ -301,9 +316,8 @@ Profile readProfile(char *email){
 //true: perfil removido com sucesso
 //false: não existe nenhum perfil vinculado ao e-mail
 //retorno: o struct Profile vinculado ao perfil removido
-Profile removeProfile(char *email){
-    Profile profile;
-    return profile;
+bool removeProfile(char *email){
+    return true;
 
 }
 
