@@ -10,7 +10,7 @@ bool addProfessionalExperience(char email[30], char professionalExperience[100])
 bool addSkill(char email[30], char skill[100]);
 bool listProfilesBasedOnSkill(char skill[100]);
 bool listProfilesBasedOnCourse(char course[30]);
-bool listProfilesBasedOnCourseCompletionYear(char courseCompletionYear[4]);
+bool listProfilesBasedOnGraduationYear(char graduationYear[4]);
 bool listAllProfiles();
 bool readProfile(char *email);
 bool removeProfile(char *email);
@@ -29,7 +29,8 @@ int main(){
     //signal = addProfessionalExperience("banana@example.com", "Trabalhei por dois anos na Conpec Corporation");
     //signal = addSkill("banana@example.com","Botar o pé atrás da cabeça");
     //signal = listAllProfiles();
-    readProfile("felipe@example.com");
+    //signal = readProfile("felipe@example.com");
+    signal = listProfilesBasedOnGraduationYear("2022");
 
     //if error
     if (!signal) {
@@ -219,7 +220,42 @@ bool listProfilesBasedOnSkill(char skill[300]){
 //casos a serem tratados:
 //true: perfis listados com sucesso
 //false: ninguém se formou naquele ano
-bool listProfilesBasedOnCourseCompletionYear(char courseCompletionYear[4]){
+bool listProfilesBasedOnGraduationYear(char graduationYear[4]){
+    sqlite3 *db;
+    char *err_msg = 0;
+    
+    int rc = sqlite3_open("app.db", &db);
+    
+    if (rc != SQLITE_OK) {
+        
+        fprintf(stderr, "Cannot open database: %s\n", 
+                sqlite3_errmsg(db));
+        sqlite3_close(db);
+        
+        return false;
+    }
+    
+    char sql[200];
+    strcpy(sql, "SELECT * FROM Profiles WHERE Graduation_Year == ");
+    strcat(sql, graduationYear);
+    strcat(sql, ";");
+
+        
+    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+    
+    if (rc != SQLITE_OK ) {
+        
+        fprintf(stderr, "Failed to select data\n");
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        
+        return false;
+    } 
+    
+    sqlite3_close(db);
+    
     return true;
 }
 
@@ -321,6 +357,8 @@ bool removeProfile(char *email){
 
 }
 
+
+//prints query results
 int callback(void *NotUsed, int argc, char **argv, 
                     char **azColName) {
     
