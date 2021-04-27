@@ -12,7 +12,7 @@ Para compilar programas contendo a biblioteca __sqlite3.h__, utilize a flag ```-
 
 ```gcc servidor.c -lsqlite3 -std=c99```
 
-##Banco de Dados
+## Banco de Dados
 
 Criamos um banco de dados em arquivo utilizando SQLite3.
 
