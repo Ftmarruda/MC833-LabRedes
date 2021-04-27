@@ -26,14 +26,17 @@ typedef struct Profile {
 
 //Protótipos
 
-bool createProfile (char email[30], char name[30], char surname[30], char address[100], char education[100], char graduationYear[4]);
-bool addProfessionalExperience (char email[30], char professionalExperience[100]);
-void listProfilesBasedOnCourse(char course[30]);
-void listProfilesBasedOnSkill(char skill[100]);
-void listProfilesBasedOnCourseCompletionYear(char courseCompletionYear[4]);
-void listAllProfiles();
+bool createProfile(char email[30], char name[30], char surname[30], char address[100], char education[100], char graduationYear[4]);
+bool addProfessionalExperience(char email[30], char professionalExperience[100]);
+bool addSkill(char email[30], char skill[100]);
+bool listProfilesBasedOnSkill(char skill[100]);
+bool listProfilesBasedOnCourse(char course[30]);
+bool listProfilesBasedOnCourseCompletionYear(char courseCompletionYear[4]);
+bool listAllProfiles();
 Profile readProfile(char *email); //FUNÇÃO PRIORITÁRIA - FAZER PRIMEIRO
 Profile removeProfile(char *email);
+
+int callback(void *, int, char **, char **);
 
 
 
@@ -43,10 +46,11 @@ int main(){
     sqlite3 *db;
     char *err_msg = 0;
     
-    //signal = createProfile("banana@example.com", "Gabriel", "Silveira", "Disneyland, Orlando", "Counter Strike University", "2022");
-    signal = addProfessionalExperience("banana@example.com", "Trabalhei por dois anos na Conpec Corporation");
-
-
+    //signal = createProfile("felipe@example.com", "Felipe", "Tiago", "Disneyland, Orlando", "Counter Strike University", "2022");
+    //signal = addProfessionalExperience("banana@example.com", "Trabalhei por dois anos na Conpec Corporation");
+    //signal = addSkill("banana@example.com","Botar o pé atrás da cabeça");
+    signal = listAllProfiles();
+    
     //if error
     if (!signal) {
         return 1;
@@ -64,8 +68,7 @@ int main(){
 //true: conta criada com sucesso
 //false: para conta criada sem sucesso (já existe outra conta com esse email)
 bool createProfile (char email[30], char name[30], char surname[30], char address[100], char education[100], char graduationYear[4]){
-    
-    bool signal = true;
+   
     sqlite3 *db;
     char *err_msg = 0;
     
@@ -76,7 +79,7 @@ bool createProfile (char email[30], char name[30], char surname[30], char addres
         fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         
-        return 1;
+        return false;
     }
 
     //Query
@@ -104,12 +107,12 @@ bool createProfile (char email[30], char name[30], char surname[30], char addres
         
         sqlite3_free(err_msg);        
         sqlite3_close(db);
-        signal = false;
+        return false;
     }
     
     sqlite3_close(db);
 
-    return signal;
+    return true;
 }
 
 
@@ -119,7 +122,6 @@ bool createProfile (char email[30], char name[30], char surname[30], char addres
 //false: não existe conta vinculada ao e-mails
 bool addProfessionalExperience (char email[30], char professionalExperience[100]){
     
-    bool signal = true;
     sqlite3 *db;
     char *err_msg = 0;
     
@@ -130,12 +132,12 @@ bool addProfessionalExperience (char email[30], char professionalExperience[100]
         fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         
-        return 1;
+        return false;
     }
 
     //Query
 
-    char sql[200];// = "INSERT INTO Experiences VALUES(NULL, 'banana@example.com', 'Trabalhei na Pecpec')";
+    char sql[200];
     strcpy(sql, "INSERT INTO Experiences VALUES(NULL, '");
     strcat(sql, email);
     strcat(sql, "', '");
@@ -150,41 +152,135 @@ bool addProfessionalExperience (char email[30], char professionalExperience[100]
         
         sqlite3_free(err_msg);        
         sqlite3_close(db);
-        signal = false;
+        return false;
     }
     
     sqlite3_close(db);
 
-    return signal;
+    return true;
+}
+
+bool addSkill(char email[30], char skill[100]){
+
+    sqlite3 *db;
+    char *err_msg = 0;
+    char *sql;
+    
+    int rc = sqlite3_open("app.db", &db);
+    
+    if (rc != SQLITE_OK) {
+        
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        
+        return false;
+    }
+
+    //Query 1
+
+    sql = malloc(200*sizeof(char));
+    strcpy(sql, "INSERT INTO Skills VALUES(NULL, '");
+    strcat(sql, skill);
+    strcat(sql, "');");
+
+    sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK ) {
+        
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+        
+        sqlite3_free(err_msg);        
+        sqlite3_close(db);
+        return false;
+    }
+
+    free(sql);
+    //Query 2
+    sql = malloc(200*sizeof(char));;
+    strcpy(sql, "INSERT INTO Profiles_Skills VALUES('");
+    strcat(sql, email);
+    strcat(sql, "', '");
+    strcat(sql, skill);
+    strcat(sql, "');");
+
+    sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK ) {
+        
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+        
+        sqlite3_free(err_msg);        
+        sqlite3_close(db);
+        return false;
+    }
+    
+    sqlite3_close(db);
+
+    return true;
 }
 
 //listar todas as pessoas (email e nome) formadas em um determinado curso;
 //casos a serem tratados:
 //true: perfis listados com sucesso
 //false: o curso não existe
-void listProfilesBasedOnCourse(char course[30]){
+bool listProfilesBasedOnCourse(char course[30]){
+    return true;
 }
 
 // - listar todas as pessoas (email e nome) que possuam uma determinada habilidade;
 //casos a serem tratados:
 //true: perfis listados com sucesso
 //false: a habilidade não existe
-void listProfilesBasedOnSkill(char skill[300]){
+bool listProfilesBasedOnSkill(char skill[300]){
+    return true;
 }
 
 //listar todas as pessoas (email, nome e curso) formadas em um determinado ano;
 //casos a serem tratados:
 //true: perfis listados com sucesso
 //false: ninguém se formou naquele ano
-void listProfilesBasedOnCourseCompletionYear(char courseCompletionYear[4]){
+bool listProfilesBasedOnCourseCompletionYear(char courseCompletionYear[4]){
+    return true;
 }
 
 //listar todas as informações de todos os perfis;
 //casos a serem tratados:
 //true: perfis listados com sucesso
 //false: não há perfis
-void listAllProfiles(){
+bool listAllProfiles(){
+
+    sqlite3 *db;
+    char *err_msg = 0;
     
+    int rc = sqlite3_open("app.db", &db);
+    
+    if (rc != SQLITE_OK) {
+        
+        fprintf(stderr, "Cannot open database: %s\n", 
+                sqlite3_errmsg(db));
+        sqlite3_close(db);
+        
+        return false;
+    }
+    
+    char *sql = "SELECT * FROM Profiles";
+        
+    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+    
+    if (rc != SQLITE_OK ) {
+        
+        fprintf(stderr, "Failed to select data\n");
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        
+        return false;
+    } 
+    
+    sqlite3_close(db);
+    
+    return true;
 
 }
 
@@ -210,4 +306,17 @@ Profile removeProfile(char *email){
     return profile;
 
 }
+
+int callback(void *NotUsed, int argc, char **argv, 
+                    char **azColName) {
     
+    NotUsed = 0;
+    
+    for (int i = 0; i < argc; i++) {
+        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+    }
+    
+    printf("\n");
+    
+    return 0;
+}
