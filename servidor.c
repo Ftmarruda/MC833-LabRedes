@@ -9,7 +9,7 @@ bool createProfile(char email[30], char name[30], char surname[30], char address
 bool addProfessionalExperience(char email[30], char professionalExperience[100]);
 bool addSkill(char email[30], char skill[100]);
 bool listProfilesBasedOnSkill(char skill[100]);
-bool listProfilesBasedOnCourse(char course[30]);
+bool listProfilesBasedOnEducation(char education[100]);
 bool listProfilesBasedOnGraduationYear(char graduationYear[4]);
 bool listAllProfiles();
 bool readProfile(char *email);
@@ -31,7 +31,8 @@ int main(){
     //signal = listAllProfiles();
     //signal = readProfile("felipe@example.com");
     //signal = listProfilesBasedOnGraduationYear("2022");
-    signal = listProfilesBasedOnSkill("Botar o pé atrás da cabeça");
+    //signal = listProfilesBasedOnSkill("Botar o pé atrás da cabeça");
+    signal = listProfilesBasedOnEducation("Counter Strike University");
 
     //if error
     if (!signal) {
@@ -102,7 +103,7 @@ bool createProfile (char email[30], char name[30], char surname[30], char addres
 //casos a serem tratados:
 //true: experiência adicionada com sucesso
 //false: não existe conta vinculada ao e-mails
-bool addProfessionalExperience (char email[30], char professionalExperience[100]){
+bool addProfessionalExperience(char email[30], char professionalExperience[100]){
     
     sqlite3 *db;
     char *err_msg = 0;
@@ -173,10 +174,11 @@ bool addSkill(char email[30], char skill[100]){
         
         sqlite3_free(err_msg);        
         sqlite3_close(db);
+        free(sql);
         return false;
     }
-
     free(sql);
+
     //Query 2
     sql = malloc(200*sizeof(char));;
     strcpy(sql, "INSERT INTO Profiles_Skills VALUES('");
@@ -194,8 +196,10 @@ bool addSkill(char email[30], char skill[100]){
         sqlite3_free(err_msg);        
         sqlite3_close(db);
         return false;
+        free(sql);
     }
-    
+    free(sql);
+
     sqlite3_close(db);
 
     return true;
@@ -205,7 +209,42 @@ bool addSkill(char email[30], char skill[100]){
 //casos a serem tratados:
 //true: perfis listados com sucesso
 //false: o curso não existe
-bool listProfilesBasedOnCourse(char course[30]){
+bool listProfilesBasedOnEducation(char education[100]){
+    sqlite3 *db;
+    char *err_msg = 0;
+    
+    int rc = sqlite3_open("app.db", &db);
+    
+    if (rc != SQLITE_OK) {
+        
+        fprintf(stderr, "Cannot open database: %s\n", 
+                sqlite3_errmsg(db));
+        sqlite3_close(db);
+        
+        return false;
+    }
+    
+    char sql[200];
+    strcpy(sql, "SELECT * FROM Profiles WHERE Education == '");
+    strcat(sql, education);
+    strcat(sql, "';");
+
+        
+    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+    
+    if (rc != SQLITE_OK ) {
+        
+        fprintf(stderr, "Failed to select data\n");
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        
+        return false;
+    } 
+    
+    sqlite3_close(db);
+    
     return true;
 }
 
