@@ -4,9 +4,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-//Protótipos
 bool createProfile(char email[30], char name[30], char surname[30], char address[100], char education[100], char graduationYear[4]);
-bool addProfessionalExperience(char email[30], char professionalExperience[100]);
+bool addExperience(char email[30], char professionalExperience[100]);
 bool addSkill(char email[30], char skill[100]);
 bool listProfilesBasedOnSkill(char skill[100]);
 bool listProfilesBasedOnEducation(char education[100]);
@@ -14,61 +13,41 @@ bool listProfilesBasedOnGraduationYear(char graduationYear[4]);
 bool listAllProfiles();
 bool readProfile(char *email);
 bool removeProfile(char *email);
-
 int callback(void *, int, char **, char **);
-
-
 
 int main(){
 
-    bool signal = true;
-    sqlite3 *db;
-    char *err_msg = 0;
-    
-    signal = createProfile("felipe@example.com", "Felipe", "Tiago", "Disneyland, Orlando", "Counter Strike University", "2022");
-    signal = createProfile("gabriel@example.com", "Gabriel", "Silveira", "Unicamp, Barão Geraldo", "Counter Strike University", "2022");
+    createProfile("felipe@example.com", "Felipe", "Tiago", "Disneyland, Orlando", "Counter Strike University", "2022");
+    createProfile("gabriel@example.com", "Gabriel", "Silveira", "Unicamp, Barão Geraldo", "Counter Strike University", "2022");
 
-    signal = addProfessionalExperience("banana@example.com", "Trabalhei por dois anos na Conpec Corporation");
-    signal = addProfessionalExperience("felipe@example.com", "Faço cerveja");
-    signal = addProfessionalExperience("gabriel@example.com", "Sou coach");
+    addExperience("banana@example.com", "Trabalhei por dois anos na Conpec Corporation");
+    addExperience("felipe@example.com", "Faço cerveja");
+    addExperience("gabriel@example.com", "Sou coach");
 
-    signal = addSkill("felipe@example.com", "HTML");
-    signal = addSkill("felipe@example.com", "CSS");
+    addSkill("felipe@example.com", "HTML");
+    addSkill("felipe@example.com", "CSS");
 
-    signal = addSkill("gabriel@example.com", "HTML");
-    signal = addSkill("gabriel@example.com", "SQL");
-    signal = addSkill("gabriel@example.com", "JavaScript");
+    addSkill("gabriel@example.com", "HTML");
+    addSkill("gabriel@example.com", "SQL");
+    addSkill("gabriel@example.com", "JavaScript");
 
-    signal = addSkill("banana@example.com", "JavaScript");
+    addSkill("banana@example.com", "JavaScript");
 
-    //signal = listAllProfiles();
+    removeProfile("gabriel@example.com");
 
-    signal = removeProfile("gabriel@example.com");
-
-
-    //signal = readProfile("felipe@example.com");
-    //signal = listProfilesBasedOnGraduationYear("2022");
-    //signal = listProfilesBasedOnSkill("Botar o pé atrás da cabeça");
-    //signal = listProfilesBasedOnEducation("Counter Strike University");
-    
-    
-
-    //if error
-    if (!signal) {
-        return 1;
-    }
+    //listAllProfiles();
+    //readProfile("felipe@example.com");
+    //listProfilesBasedOnGraduationYear("2022");
+    //listProfilesBasedOnSkill("Botar o pé atrás da cabeça");
+    //listProfilesBasedOnEducation("Counter Strike University");
     
     return 0;
-
 }
 
+//------------------------------
+//------||   FUNÇÕES    ||------
+//------------------------------
 
-//Funções
-
-//Cadastrar um novo perfil utilizando o email como identificador
-//retornos:
-//true: conta criada com sucesso
-//false: para conta criada sem sucesso (já existe outra conta com esse email)
 bool createProfile (char email[30], char name[30], char surname[30], char address[100], char education[100], char graduationYear[4]){
    
     sqlite3 *db;
@@ -117,12 +96,7 @@ bool createProfile (char email[30], char name[30], char surname[30], char addres
     return true;
 }
 
-
-//acrescentar uma nova experiência profissional em um perfil; 
-//casos a serem tratados:
-//true: experiência adicionada com sucesso
-//false: não existe conta vinculada ao e-mails
-bool addProfessionalExperience(char email[30], char professionalExperience[100]){
+bool addExperience(char email[30], char experience[100]){
     
     sqlite3 *db;
     char *err_msg = 0;
@@ -138,12 +112,11 @@ bool addProfessionalExperience(char email[30], char professionalExperience[100])
     }
 
     //Query
-
     char sql[200];
     strcpy(sql, "INSERT OR IGNORE INTO Experiences VALUES(NULL, '");
     strcat(sql, email);
     strcat(sql, "', '");
-    strcat(sql, professionalExperience);
+    strcat(sql, experience);
     strcat(sql, "');");
 
     sqlite3_exec(db, sql, 0, 0, &err_msg);
@@ -227,10 +200,6 @@ bool addSkill(char email[30], char skill[100]){
     return true;
 }
 
-//listar todas as pessoas (email e nome) formadas em um determinado curso;
-//casos a serem tratados:
-//true: perfis listados com sucesso
-//false: o curso não existe
 bool listProfilesBasedOnEducation(char education[100]){
     sqlite3 *db;
     char *err_msg = 0;
@@ -270,10 +239,6 @@ bool listProfilesBasedOnEducation(char education[100]){
     return true;
 }
 
-// - listar todas as pessoas (email e nome) que possuam uma determinada habilidade;
-//casos a serem tratados:
-//true: perfis listados com sucesso
-//false: a habilidade não existe
 bool listProfilesBasedOnSkill(char skill[300]){
     sqlite3 *db;
     char *err_msg = 0;
@@ -313,10 +278,6 @@ bool listProfilesBasedOnSkill(char skill[300]){
     return true;
 }
 
-//listar todas as pessoas (email, nome e curso) formadas em um determinado ano;
-//casos a serem tratados:
-//true: perfis listados com sucesso
-//false: ninguém se formou naquele ano
 bool listProfilesBasedOnGraduationYear(char graduationYear[4]){
     sqlite3 *db;
     char *err_msg = 0;
@@ -356,10 +317,6 @@ bool listProfilesBasedOnGraduationYear(char graduationYear[4]){
     return true;
 }
 
-//listar todas as informações de todos os perfis;
-//casos a serem tratados:
-//true: perfis listados com sucesso
-//false: não há perfis
 bool listAllProfiles(){
 
     sqlite3 *db;
@@ -396,13 +353,6 @@ bool listAllProfiles(){
     return true;
 
 }
-
-//FUNÇÃO PRIORITÁRIA - FAZER PRIMEIRO
-//dado o email de um perfil, retornar suas informações
-//casos a serem tratados:
-//true: perfil lido com sucesso
-//false: não existe nenhum perfil vinculado ao e-mail
-//retorno: o struct Profile vinculado ao perfil lido
 
 bool readProfile(char *email){
 
@@ -444,11 +394,6 @@ bool readProfile(char *email){
     return true;
 }
 
-//remover um perfil a partir de seu identificador (email). 
-//casos a serem tratados:
-//true: perfil removido com sucesso
-//false: não existe nenhum perfil vinculado ao e-mail
-//retorno: o struct Profile vinculado ao perfil removido
 bool removeProfile(char *email){
     
     sqlite3 *db;
@@ -491,7 +436,6 @@ bool removeProfile(char *email){
     return true;
 
 }
-
 
 //prints query results
 int callback(void *NotUsed, int argc, char **argv, 
