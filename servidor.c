@@ -27,10 +27,11 @@ int main(){
     
     //signal = createProfile("felipe@example.com", "Felipe", "Tiago", "Disneyland, Orlando", "Counter Strike University", "2022");
     //signal = addProfessionalExperience("banana@example.com", "Trabalhei por dois anos na Conpec Corporation");
-    //signal = addSkill("banana@example.com","Botar o pé atrás da cabeça");
+    //signal = addSkill("felipe@example.com","Botar o pé atrás da cabeça");
     //signal = listAllProfiles();
     //signal = readProfile("felipe@example.com");
-    signal = listProfilesBasedOnGraduationYear("2022");
+    //signal = listProfilesBasedOnGraduationYear("2022");
+    signal = listProfilesBasedOnSkill("Botar o pé atrás da cabeça");
 
     //if error
     if (!signal) {
@@ -213,6 +214,41 @@ bool listProfilesBasedOnCourse(char course[30]){
 //true: perfis listados com sucesso
 //false: a habilidade não existe
 bool listProfilesBasedOnSkill(char skill[300]){
+    sqlite3 *db;
+    char *err_msg = 0;
+    
+    int rc = sqlite3_open("app.db", &db);
+    
+    if (rc != SQLITE_OK) {
+        
+        fprintf(stderr, "Cannot open database: %s\n", 
+                sqlite3_errmsg(db));
+        sqlite3_close(db);
+        
+        return false;
+    }
+    
+    char sql[200];
+    strcpy(sql, "SELECT * FROM Profiles_Skills, Profiles WHERE Profiles_Skills.Profile_Email = Profiles.Email AND Skill_Description == '");
+    strcat(sql, skill);
+    strcat(sql, "';");
+
+        
+    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+    
+    if (rc != SQLITE_OK ) {
+        
+        fprintf(stderr, "Failed to select data\n");
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        
+        return false;
+    } 
+    
+    sqlite3_close(db);
+    
     return true;
 }
 
