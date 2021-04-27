@@ -43,7 +43,6 @@ int main(){
 
     //signal = listAllProfiles();
 
-    signal = removeProfile("banana@example.com");
     signal = removeProfile("gabriel@example.com");
 
 
@@ -84,7 +83,7 @@ bool createProfile (char email[30], char name[30], char surname[30], char addres
         
         return false;
     }
-
+    
     //Query
 
     char sql[200];
@@ -465,6 +464,8 @@ bool removeProfile(char *email){
         
         return false;
     }
+
+    sqlite3_exec(db, "PRAGMA foreign_keys = ON", callback, 0, &err_msg);
     
     char sql[200];
     strcpy(sql, "DELETE FROM Profiles WHERE Email == '");
