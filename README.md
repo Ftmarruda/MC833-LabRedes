@@ -50,3 +50,7 @@ Uma habilidade pode pertencer à mais de um perfil. Um perfil pode ter mais de u
 
 - Profile_Email -> Chave Extrangeira
 - Skill_ID -> Chave Extrangeira.
+
+## Bibliografia
+
+[https://zetcode.com/db/sqlitec/]

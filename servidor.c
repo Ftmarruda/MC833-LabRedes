@@ -9,6 +9,7 @@
 #include <sqlite3.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 //Structs
 
@@ -25,10 +26,10 @@ typedef struct Profile {
 
 //Protótipos
 
-bool createProfile (char email[30]);
-bool addProfessionalExperience (char email[30], char professionalExperience[300]);
+bool createProfile (char email[30], char name[30], char surname[30], char address[100], char education[100], char graduationYear[4]);
+bool addProfessionalExperience (char email[30], char professionalExperience[100]);
 void listProfilesBasedOnCourse(char course[30]);
-void listProfilesBasedOnSkill(char skill[300]);
+void listProfilesBasedOnSkill(char skill[100]);
 void listProfilesBasedOnCourseCompletionYear(char courseCompletionYear[4]);
 void listAllProfiles();
 Profile readProfile(char *email); //FUNÇÃO PRIORITÁRIA - FAZER PRIMEIRO
@@ -38,7 +39,19 @@ Profile removeProfile(char *email);
 
 int main(){
 
-    printf("SQLite3 version: %s\n", sqlite3_libversion()); 
+    bool signal = true;
+    sqlite3 *db;
+    char *err_msg = 0;
+    
+    //signal = createProfile("banana@example.com", "Gabriel", "Silveira", "Disneyland, Orlando", "Counter Strike University", "2022");
+    signal = addProfessionalExperience("banana@example.com", "Trabalhei por dois anos na Conpec Corporation");
+
+
+    //if error
+    if (!signal) {
+        return 1;
+    }
+    
     return 0;
 
 }
@@ -50,8 +63,52 @@ int main(){
 //retornos:
 //true: conta criada com sucesso
 //false: para conta criada sem sucesso (já existe outra conta com esse email)
-bool createProfile (char email[30]){
-    bool signal = true;//mock
+bool createProfile (char email[30], char name[30], char surname[30], char address[100], char education[100], char graduationYear[4]){
+    
+    bool signal = true;
+    sqlite3 *db;
+    char *err_msg = 0;
+    
+    int rc = sqlite3_open("app.db", &db);
+    
+    if (rc != SQLITE_OK) {
+        
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        
+        return 1;
+    }
+
+    //Query
+
+    char sql[200];
+    strcpy(sql, "INSERT INTO Profiles VALUES('");
+    strcat(sql, email);
+    strcat(sql, "', '");
+    strcat(sql, name);
+    strcat(sql, "', '");
+    strcat(sql, surname);
+    strcat(sql, "', '");
+    strcat(sql, address);
+    strcat(sql, "', '");
+    strcat(sql, education);
+    strcat(sql, "', ");
+    strcat(sql, graduationYear);
+    strcat(sql, ");");
+
+    sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK ) {
+        
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+        
+        sqlite3_free(err_msg);        
+        sqlite3_close(db);
+        signal = false;
+    }
+    
+    sqlite3_close(db);
+
     return signal;
 }
 
@@ -60,8 +117,44 @@ bool createProfile (char email[30]){
 //casos a serem tratados:
 //true: experiência adicionada com sucesso
 //false: não existe conta vinculada ao e-mails
-bool addProfessionalExperience (char email[30], char professionalExperience[300]){
-    bool signal = true;//mock
+bool addProfessionalExperience (char email[30], char professionalExperience[100]){
+    
+    bool signal = true;
+    sqlite3 *db;
+    char *err_msg = 0;
+    
+    int rc = sqlite3_open("app.db", &db);
+    
+    if (rc != SQLITE_OK) {
+        
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        
+        return 1;
+    }
+
+    //Query
+
+    char sql[200];// = "INSERT INTO Experiences VALUES(NULL, 'banana@example.com', 'Trabalhei na Pecpec')";
+    strcpy(sql, "INSERT INTO Experiences VALUES(NULL, '");
+    strcat(sql, email);
+    strcat(sql, "', '");
+    strcat(sql, professionalExperience);
+    strcat(sql, "');");
+
+    sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK ) {
+        
+        fprintf(stderr, "SQL error: %s\n", err_msg);
+        
+        sqlite3_free(err_msg);        
+        sqlite3_close(db);
+        signal = false;
+    }
+    
+    sqlite3_close(db);
+
     return signal;
 }
 
