@@ -12,6 +12,7 @@
 *.exe
 *.o
 *.so
+*.out
 
 # Packages #
 ############

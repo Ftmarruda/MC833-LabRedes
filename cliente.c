@@ -28,11 +28,13 @@ int main(){
     
     typedef struct sockaddr_in sockaddr_in;
     typedef struct sockaddr sockaddr;
-    char *clientMessage = "OI, EU SOU O CLIENTE", response[256];
-    int mySocket, connectionStatus;
+    char request[256], response[256];
+    int serverSocket, status;
 
+    strcpy(request, "QUERO CRIAR O PERFIL\n");
+    strcpy(response, "\0");
     //creating a TCP socket
-    mySocket = socket(AF_INET, SOCK_STREAM, 0);
+    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     //socket address
     struct sockaddr_in server_address;
@@ -40,19 +42,35 @@ int main(){
     server_address.sin_port = htons(50000);
     server_address.sin_addr.s_addr = INADDR_ANY;//server address -> substituir pelo IP do servidor quando em outro computado
 
-    connectionStatus = connect(mySocket, (sockaddr *) &server_address, sizeof(server_address));
+    status = connect(serverSocket, (sockaddr *) &server_address, sizeof(server_address));
 
-    if(connectionStatus == -1){
-        printf("Connection failed\n\n");
-        close(mySocket);
+    if(status == -1){
+        perror("Connection failed\n\n");
+        close(serverSocket);
         return 1;
     }
 
-    //receive message from server;
-    recv(mySocket, &response, sizeof(response), 0);
-    printf("The server has responded: %s\n", response);
+    //keep server communication
+    while(1){
+        //send request
+        status = send(serverSocket, &request, sizeof(request), 0);
+		if(status < 0){
+			printf("Send failed, error code %d\n", status);
+			return 1;
+		}
+		
+		//receive message from server;
+		status = recv(serverSocket, &response, sizeof(response), 0);
+        if(status < 0){
+			printf("Recv failed, error code %d\n", status);
+			break;
+		}
+		
+		printf("The server has responded: %s\n", response);
 
-    close(mySocket);
+    }
+
+    close(serverSocket);
 
     return 0;
 
