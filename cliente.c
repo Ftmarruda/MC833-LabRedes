@@ -1,8 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
-//Structs
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#include <netinet/in.h>
 
 typedef struct Profile {
     char email[30];
@@ -15,98 +19,30 @@ typedef struct Profile {
     char *skill[300]; //vetor de strings
 } Profile;
 
-
-
-//Protótipos
-
-bool createProfile (char email[30]);
-bool addProfessionalExperience (char email[30], char professionalExperience[300]);
-void listProfilesBasedOnCourse(char course[30]);
-void listProfilesBasedOnSkill(char skill[300]);
-void listProfilesBasedOnCourseCompletionYear(char courseCompletionYear[4]);
-void listAllProfiles();
 Profile readProfile(char *email); //FUNÇÃO PRIORITÁRIA - FAZER PRIMEIRO
 Profile removeProfile(char *email);
 
 
 int main(){
-    
-    printf("Cliente!\n");
+    //creating a TCP socket
+    int mySocket, connectionStatus;
+    mySocket = socket(AF_INET, SOCK_STREAM, 0);
+
+    //socket address
+    typedef struct sockaddr_in sockaddr_in;
+    typedef struct sockaddr sockaddr;
+    struct sockaddr_in server_address;
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(50000);
+    server_address.sin_addr.s_addr = INADDR_ANY;//server address -> substituir pelo IP do servidor
+
+    connectionStatus = connect(mySocket, (sockaddr *) &server_address, sizeof(server_address));
+
+    if(connectionStatus == -1){
+        printf("Connection failed\n\n");
+        return 1;
+    }
+
     return 0;
 
 }
-
-//Funções
-
-//Cadastrar um novo perfil utilizando o email como identificador
-//retornos:
-//true: conta criada com sucesso
-//false: para conta criada sem sucesso (já existe outra conta com esse email)
-bool createProfile (char email[30]){
-    bool signal = true;//mock
-    return signal;
-}
-
-
-//acrescentar uma nova experiência profissional em um perfil; 
-//casos a serem tratados:
-//true: experiência adicionada com sucesso
-//false: não existe conta vinculada ao e-mails
-bool addProfessionalExperience (char email[30], char professionalExperience[300]){
-    bool signal = true;//mock
-    return signal;
-}
-
-//listar todas as pessoas (email e nome) formadas em um determinado curso;
-//casos a serem tratados:
-//true: perfis listados com sucesso
-//false: o curso não existe
-void listProfilesBasedOnCourse(char course[30]){
-}
-
-// - listar todas as pessoas (email e nome) que possuam uma determinada habilidade;
-//casos a serem tratados:
-//true: perfis listados com sucesso
-//false: a habilidade não existe
-void listProfilesBasedOnSkill(char skill[300]){
-}
-
-//listar todas as pessoas (email, nome e curso) formadas em um determinado ano;
-//casos a serem tratados:
-//true: perfis listados com sucesso
-//false: ninguém se formou naquele ano
-void listProfilesBasedOnCourseCompletionYear(char courseCompletionYear[4]){
-}
-
-//listar todas as informações de todos os perfis;
-//casos a serem tratados:
-//true: perfis listados com sucesso
-//false: não há perfis
-void listAllProfiles(){
-    
-
-}
-
-//FUNÇÃO PRIORITÁRIA - FAZER PRIMEIRO
-//dado o email de um perfil, retornar suas informações
-//casos a serem tratados:
-//true: perfil lido com sucesso
-//false: não existe nenhum perfil vinculado ao e-mail
-//retorno: o struct Profile vinculado ao perfil lido
-
-Profile readProfile(char *email){
-    Profile profile;
-    return profile;
-}
-
-//remover um perfil a partir de seu identificador (email). 
-//casos a serem tratados:
-//true: perfil removido com sucesso
-//false: não existe nenhum perfil vinculado ao e-mail
-//retorno: o struct Profile vinculado ao perfil removido
-Profile removeProfile(char *email){
-    Profile profile;
-    return profile;
-
-}
-    
