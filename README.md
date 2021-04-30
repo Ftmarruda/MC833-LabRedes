@@ -55,9 +55,14 @@ Uma habilidade pode pertencer à mais de um perfil. Um perfil pode ter mais de u
 - Profile_Email -> Chave Extrangeira
 - Skill_ID -> Chave Extrangeira.
 
+usar a flag -lcjson , escrever sobre jsonfy
+
+para compilar: gcc -o cliente cliente.c cJSON.c  -lsqlite3 
+
 ## Bibliografia
 
 [https://zetcode.com/db/sqlitec/]
 [http://www.steves-internet-guide.com/tcpip-ports-sockets/]
 [https://www.youtube.com/watch?v=LtXEMwSG5-8&t=1414s]
 [https://www.binarytides.com/server-client-example-c-sockets-linux/]
+[https://github.com/DaveGamble/cJSON]

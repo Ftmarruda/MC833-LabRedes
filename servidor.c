@@ -13,6 +13,8 @@
 #include <sqlite3.h>
 #include "dao.h"
 
+#include "profileTypes.h"
+
 int main(){
 
     typedef struct sockaddr_in sockaddr_in;
@@ -22,7 +24,7 @@ int main(){
     int serverSocket, clientSocket, status;
 
     strcpy(request, "\0");
-    strcpy(serverMessage, "OI, EU SOU O SERVIDOR");
+    strcpy(serverMessage, "BEM-VINDO AO SUPERPAPO");
     //create the server socket
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -50,7 +52,7 @@ int main(){
         printf("The client has requested: %s", request);
 
         //send message
-        status = send(clientSocket, &serverMessage, sizeof(request), 0);
+        status = send(clientSocket, &request, sizeof(request), 0);
 		if(status < 0){
 			printf("Send failed, error code %d\n", status);
 			return 1;
