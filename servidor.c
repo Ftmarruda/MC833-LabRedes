@@ -10,7 +10,6 @@
 #include <netinet/in.h>
 
 #include <sqlite3.h>
-
 #include "dao.h"
 
 int main(){
@@ -30,7 +29,7 @@ int main(){
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(50000);
-    server_address.sin_addr.s_addr;//server address -> substituir pelo IP do servidor quando em outro computador
+    server_address.sin_addr.s_addr = INADDR_ANY;//server address -> substituir pelo IP do servidor quando em outro computador
 
     //bind the socket to IP and port
     bind(serverSocket, (sockaddr *) &server_address, sizeof(server_address));
