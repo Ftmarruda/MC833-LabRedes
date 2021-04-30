@@ -10,7 +10,7 @@ Para compilar programas contendo a biblioteca __sqlite3.h__, utilize a flag ```-
 
 **Por exemplo:**
 
-```gcc servidor.c -lsqlite3 -std=c99```
+```gcc servidor.c -lsqlite3 -std=c99 -o servidor```
 
 Se ainda persistirem os erros, executar o seguinte comando:
 

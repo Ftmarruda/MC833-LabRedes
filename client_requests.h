@@ -18,8 +18,8 @@ struct sockaddr_in server_address;
 char request[256], response[256];
 
 bool createProfile();
-bool addExperience(char email[30], char professionalExperience[100]);
-bool addSkill(char email[30], char skill[100]);
+bool addExperience();
+bool addSkill();
 bool listProfilesBasedOnSkill(char skill[100]);
 bool listProfilesBasedOnEducation(char education[100]);
 bool listProfilesBasedOnGraduationYear(char graduationYear[4]);
@@ -57,8 +57,12 @@ bool createProfile(){
 
     printf("\n\nEnviando informações ao servidor\n");
     printf("-----------------Aguarde-----------------\n\n");
+
     int status;
     status = send(serverSocket, &request, sizeof(request), 0);
+    printf("%d\n", status);
+    printf("%d\n", sizeof(request));
+    
             if(status < 0){
                 printf("Send failed, error code %d\n", status);
                 return false;
@@ -72,4 +76,37 @@ bool createProfile(){
             }
             printf("The server has responded: %s\n", response);
     return true;
+}
+
+bool addExperience(){
+    char email[30], professionalExperience[100];
+    printf("------------------------------------------\n\n");
+    printf("\n    2. Adicionar experiência à perfil\n");
+    printf("------------------------------------------\n\n");
+
+    printf("-> Insira o email do perfil: ");
+    scanf("%s", email);
+
+    printf("-> Insira a experiência profissonal do perfil: ");
+    scanf("%s", professionalExperience);
+    return true;
+}
+
+bool addSkill(){
+    char email[30], skill[100];
+    printf("------------------------------------------\n\n");
+    printf("\n    3. Adicionar habilidade à perfil\n");
+    printf("------------------------------------------\n\n");
+
+    printf("-> Insira o email do perfil: ");
+    scanf("%s", email);
+
+    printf("-> Insira a habilidade que deseja adicionar ao perfil: ");
+    scanf("%s", skill);
+
+    return true;
+}
+
+bool list_user(){
+
 }
