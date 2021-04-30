@@ -30,7 +30,7 @@ int main(){
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(50000);
-    server_address.sin_addr.s_addr = INADDR_ANY;//server address -> substituir pelo IP do servidor quando em outro computador
+    server_address.sin_addr.s_addr = inet_addr("192.168.7.226"); //seu IP local do servidor vai aqui
 
     //bind the socket to IP and port
     bind(serverSocket, (sockaddr *) &server_address, sizeof(server_address));
