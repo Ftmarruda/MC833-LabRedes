@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include <sqlite3.h>
 
@@ -22,7 +23,7 @@ int main(){
     int serverSocket, clientSocket, status;
 
     strcpy(request, "\0");
-    strcpy(request, "OI, EU SOU O SERVIDOR");
+    strcpy(serverMessage, "OI, EU SOU O SERVIDOR");
     //create the server socket
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -30,7 +31,7 @@ int main(){
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(50000);
-    server_address.sin_addr.s_addr;//server address -> substituir pelo IP do servidor quando em outro computador
+    server_address.sin_addr.s_addr = INADDR_ANY;  //inet_addr("172.18.196.255");//server address -> substituir pelo IP do servidor quando em outro computador
 
     //bind the socket to IP and port
     bind(serverSocket, (sockaddr *) &server_address, sizeof(server_address));
@@ -47,14 +48,16 @@ int main(){
 			printf("Recv failed, error code %d\n", status);
 		}
 
+        printf("The client has requested: %s", request);
+
         //send message
-        status = send(clientSocket, &request, sizeof(request), 0);
+        status = send(clientSocket, &serverMessage, sizeof(request), 0);
 		if(status < 0){
 			printf("Send failed, error code %d\n", status);
 			return 1;
 		}
 		
-		printf("The client has requested: %s\n", request);
+		
 
     }
 
