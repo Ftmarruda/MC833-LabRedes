@@ -46,7 +46,7 @@ int main(){
     //socket address
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(50000);
-    server_address.sin_addr.s_addr = INADDR_ANY;//server address -> substituir pelo IP do servidor quando em outro computado
+    server_address.sin_addr.s_addr = inet_addr("192.168.7.226"); //o IP local do servidor vai aqui
 
     status = connect(serverSocket, (sockaddr *) &server_address, sizeof(server_address));
     if(status == -1){
