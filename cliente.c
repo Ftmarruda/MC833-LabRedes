@@ -14,26 +14,20 @@
 #include <arpa/inet.h>
 #include "client_requests.h"
 
-typedef struct Profile {
+/*typedef struct Profile {
     char email[30];
     char name[30];
     char surname[30];
-    char address[45];
-    char education[30];
+    char address[100];
+    char education[100];
     char graduationYear[4];
-    char *professionalExperience[300]; //vetor de string
-    char *skill[300]; //vetor de strings
-} Profile;
-
-void cleanBuffer(){
-    int n;
-    while((n = getchar()) != EOF && n != '\n' );
-}
-
-
+    Experience *experience[100]; //vetor de experiencias
+    Skill *skills[100]; //vetor de skills
+} Profile;*/
 
 int main(){
     int status;
+    bool validation;
 
     strcpy(request, "Connect\n");
     strcpy(response, "\0");
@@ -46,7 +40,7 @@ int main(){
     //socket address
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(50000);
-    server_address.sin_addr.s_addr = inet_addr("172.18.204.42"); //o IP local do servidor vai aqui
+    server_address.sin_addr.s_addr = inet_addr("172.26.63.45"); //o IP local do servidor vai aqui
 
     status = connect(serverSocket, (sockaddr *) &server_address, sizeof(server_address));
     if(status == -1){
@@ -59,7 +53,7 @@ int main(){
 
     char op = -1;
     char email[30], name[30],surname[30], address[100], education[100], graduationYear[4];
-    int flag = 1;
+    bool flag = true;
     //keep server communication
     while(flag){
         printf("\n\n------------------------------------------\n");
@@ -79,34 +73,48 @@ int main(){
         switch (op)
         {
         case '1'://criar novo usuário
-            createProfile();
+            validation = createProfile();
+            break;
+
+        case '2'://criar novo usuário
+            validation = addExperience();
             break;
         
-        case '3':
+        case '3'://adiciona skill a usuário
+            validation = addSkill();
             break;
 
-        case '4':
+        case '4'://traz menu para escolha de qual listagem o usuário quer realizar
+            validation = list();
             break;
 
-        case '5':
+        case '5'://remover perfil de usuário baseado no e-mail
+            validation = removeProfile();
             break;
 
-        case '6':
-            printf("\n\nTchau! Volte sempre!\n\n");
-            flag = 0;
+        case '6'://desligar aplicação
+            printf("\n\n------------------------------------------\n");
+            printf("    Fechando conexão com o servidor....\n");
+            printf("------------------------------------------\n\n");
+            close(serverSocket);
+            printf("-----------Tchau! Volte sempre!-----------\n\n");
+            flag = false;
             break;    
 
-        default:
+        default://colocar algum caracter invalido
             printf("\n\n------------------------------------------\n");
             printf("--------------Opção-Invalida--------------\n");
-            printf("------------------------------------------\n");
+            printf("------------------------------------------\n\n");
             break;
         }
-        cleanBuffer();
+
+
+        if(flag && validation){
+            printf("\n--------------Sucesso!!--------------\n");
+        }else if(flag && !validation){
+            printf("\n--------------Erro!!--------------\n");
+        }
+    
     }
-
-    close(serverSocket);
-
     return 0;
-
 }

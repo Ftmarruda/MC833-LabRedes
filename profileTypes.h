@@ -1,10 +1,4 @@
-typedef struct Skill{
-    char description[100];
-} Skill;
 
-typedef struct Experience{
-    char description[100];
-} Experience;
 
 typedef struct Profile {
     char email[30];
@@ -13,6 +7,6 @@ typedef struct Profile {
     char address[100];
     char education[100];
     char graduationYear[4];
-    Experience *experience[100]; //vetor de experiencias
-    Skill *skills[100]; //vetor de skills
-} Profile;
+    char **experience; //vetor de experiencias
+    char **skills; //vetor de skills
+} Profile; 
