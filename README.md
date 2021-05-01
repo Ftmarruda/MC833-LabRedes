@@ -4,13 +4,21 @@ Disponível em: https://classroom.google.com/c/MjYzMTE3MTA2NDky/a/MzA3MDY2NDkwND
 
 Desenvolvido por Fe e Silvs
 
+## Requisitos
+
+- SQLite3
+
+## Compilação
+Para compilar o programa, utilize
+```gcc -o cliente cliente.c cJSON.c  -lsqlite3```
+
 ## Utilizando SQLite3 com C:
 
 Para compilar programas contendo a biblioteca __sqlite3.h__, utilize a flag ```-lsqlite3``` do GCC.
 
 **Por exemplo:**
 
-```gcc servidor.c -lsqlite3 -std=c99 -o servidor```
+```gcc servidor.c -lsqlite3 -o servidor```
 
 Se ainda persistirem os erros, executar o seguinte comando:
 
@@ -58,6 +66,16 @@ Uma habilidade pode pertencer à mais de um perfil. Um perfil pode ter mais de u
 usar a flag -lcjson , escrever sobre jsonfy
 
 para compilar: gcc -o cliente cliente.c cJSON.c  -lsqlite3 
+
+## cJSON
+
+utilizamos a biblioteca cJSON para trabalhar com JSON dentro do C.
+
+### JSONfier.h
+
+JSONfier.h é um arquivo intermediario entre client_requests.h e cJSON.c que cria mensagens padronizadas que serão enviadas para o servidor.
+Essas mensagens são strings que seguem o formato JSON, e que podem ser parseadas no servidor para se obter informações. 
+
 
 ## Bibliografia
 
