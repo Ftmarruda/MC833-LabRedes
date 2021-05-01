@@ -19,8 +19,8 @@ typedef struct Profile {
     char name[30];
     char surname[30];
     char address[45];
-    char course[30];
-    char courseCompletionYear[4];
+    char education[30];
+    char graduationYear[4];
     char *professionalExperience[300]; //vetor de string
     char *skill[300]; //vetor de strings
 } Profile;
@@ -102,6 +102,7 @@ int main(){
             printf("------------------------------------------\n");
             break;
         }
+        cleanBuffer();
     }
 
     close(serverSocket);
