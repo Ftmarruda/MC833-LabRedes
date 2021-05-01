@@ -243,7 +243,7 @@ bool listProfilesBasedOnGraduationYear(){
     printf("\n e. Listar baseado em ano de conclusão\n");
     printf("------------------------------------------\n\n");
 
-    printf("-> Insira o curso que procura: ");
+    printf("-> Insira o ano de conclusão que procura: ");
     scanf("%s", graduationYear);
 
     printf("\n\nEnviando informações ao servidor\n");
@@ -255,7 +255,7 @@ bool listProfilesBasedOnGraduationYear(){
 }
 
 bool list(){
-    cleanBuffer();
+
     char letter;
     int flag = 1;
     bool retorno = true;
@@ -308,12 +308,13 @@ bool list(){
 
         default://colocar algum caracter invalido
             printf("\n\n------------------------------------------\n");
-            printf("--------------Opção-Invalida2222--------------\n");
+            printf("--------------Opção-Invalida--------------\n");
             printf("------------------------------------------\n\n");
             break;
         }
         
     }
+    cleanBuffer();
     return retorno;
 }
 
