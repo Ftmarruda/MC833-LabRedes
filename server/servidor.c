@@ -20,17 +20,17 @@ int main(){
 
     typedef struct sockaddr_in sockaddr_in;
     typedef struct sockaddr sockaddr;
-    ssize_t     n;
+    ssize_t n;
 
     char serverMessage[256], request[256];
-    int serverSocket, clientSocket;
+    int serverSocket, clientSocket = 0;
 
     strcpy(serverMessage, "BEM-VINDO AO SUPERPAPO");
     //create the server socket
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     //define server address
-    struct sockaddr_in server_address;
+    sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(50000);
     server_address.sin_addr.s_addr = INADDR_ANY;
@@ -38,7 +38,7 @@ int main(){
     len = sizeof(server_address);
 
     //define client adrr
-    struct sockaddr client_address;
+    sockaddr client_address;
 
 
     //bind the socket to IP and port
@@ -50,7 +50,7 @@ int main(){
     
     while(clientSocket != -1){
 
-        clientSocket = accept(serverSocket, (struct sockaddr *) &client_address, &len); //-> substituir valores de null por outras estruturas se quiser pegar o endereço do cliente
+        clientSocket = accept(serverSocket, (sockaddr *) &client_address, &len); //-> substituir valores de null por outras estruturas se quiser pegar o endereço do cliente
         printf("client socket: %d\n", clientSocket);
         close(serverSocket);
 
