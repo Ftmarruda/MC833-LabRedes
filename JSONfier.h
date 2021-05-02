@@ -4,14 +4,6 @@
 #include "cJSON.h"
 #include "profileTypes.h"
 
-typedef struct JSONskill{
-    char description[100];
-} JSONskill;
-
-typedef struct JSONexperience{
-    char description[100];
-} JSONexperience;
-
 typedef struct JSONprofile {
     cJSON *email;
     cJSON *name;
@@ -19,8 +11,8 @@ typedef struct JSONprofile {
     cJSON *address;
     cJSON *education;
     cJSON *graduationYear;
-    JSONexperience *experience[100]; //vetor de experiencias
-    JSONskill *skills[100]; //vetor de skills
+    cJSON *experience; //vetor de experiencias
+    cJSON *skills; //vetor de skills
 } JSONprofile;
 
 typedef struct JSONquery {
@@ -29,9 +21,13 @@ typedef struct JSONquery {
     cJSON *object;
 } JSONquery;
 
-char* create(Profile profile);
+char* createJson(Profile profile);
+char* addSkillJson(Profile profile, int len);
+char* addExperienceJson(Profile profile, int len);
+char* removeJson(Profile profile);
+char* listJson(char operation, char* string);
 
-char* create(Profile profile){
+char* createJson(Profile profile){
     //Create JSON object
     JSONprofile JSONprofileCreate;
     JSONquery query;
@@ -118,4 +114,272 @@ char* create(Profile profile){
 
     return string;
 
+}
+
+char* addSkillJson(Profile profile, int len){
+    //Create JSON object
+    JSONprofile JSONprofileCreate;
+    JSONquery query;
+
+    char *string = NULL;
+
+    query.wrapper = cJSON_CreateObject();
+    if (query.wrapper == NULL){
+        goto end;
+    }
+
+    //OPERATION
+    query.operation = cJSON_CreateString("ADD_SKILL");
+    if (query.operation == NULL){
+        goto end;
+    }
+    /* after creation was successful, immediately add it to the monitor,
+     * thereby transferring ownership of the pointer to it */
+    cJSON_AddItemToObject(query.wrapper, "operation", query.operation);
+
+    //PROFILE OBJECT
+    query.object = cJSON_CreateObject();
+    if (query.object == NULL){
+        goto end;
+    }
+    cJSON_AddItemToObject(query.wrapper, "object", query.object);
+
+    //EMAIL
+    JSONprofileCreate.email = cJSON_CreateString(profile.email);
+    if (JSONprofileCreate.email == NULL){
+        goto end;
+    }
+    cJSON_AddItemToObject(query.object, "email", JSONprofileCreate.email);
+
+    //Array of skills
+    JSONprofileCreate.skills = cJSON_CreateStringArray(profile.skills, len);
+    if (JSONprofileCreate.email == NULL){
+        goto end;
+    }
+    cJSON_AddItemToObject(query.object, "skills", JSONprofileCreate.skills);
+    
+
+    //JSONfy to string
+    string = cJSON_Print(query.wrapper);
+    if (string == NULL)
+    {
+        fprintf(stderr, "Objeto JSON não pôde ser exibido.\n");
+    }
+
+    if(0){
+        end:
+        printf("Falha ao criar o objeto JSON.\n");
+    }
+    
+    cJSON_Delete(query.wrapper);
+
+    return string;
+}
+
+char* addExperienceJson(Profile profile, int len){
+    //Create JSON object
+    JSONprofile JSONprofileCreate;
+    JSONquery query;
+
+    char *string = NULL;
+
+    query.wrapper = cJSON_CreateObject();
+    if (query.wrapper == NULL){
+        goto end;
+    }
+
+    //OPERATION
+    query.operation = cJSON_CreateString("ADD_EXP");
+    if (query.operation == NULL){
+        goto end;
+    }
+    /* after creation was successful, immediately add it to the monitor,
+     * thereby transferring ownership of the pointer to it */
+    cJSON_AddItemToObject(query.wrapper, "operation", query.operation);
+
+    //PROFILE OBJECT
+    query.object = cJSON_CreateObject();
+    if (query.object == NULL){
+        goto end;
+    }
+    cJSON_AddItemToObject(query.wrapper, "object", query.object);
+
+    //EMAIL
+    JSONprofileCreate.email = cJSON_CreateString(profile.email);
+    if (JSONprofileCreate.email == NULL){
+        goto end;
+    }
+    cJSON_AddItemToObject(query.object, "email", JSONprofileCreate.email);
+
+    //Array of experiences
+    JSONprofileCreate.experience = cJSON_CreateStringArray(profile.experience, len);
+    if (JSONprofileCreate.email == NULL){
+        goto end;
+    }
+    cJSON_AddItemToObject(query.object, "experiences", JSONprofileCreate.experience);
+
+    //JSONfy to string
+    string = cJSON_Print(query.wrapper);
+    if (string == NULL)
+    {
+        fprintf(stderr, "Objeto JSON não pôde ser exibido.\n");
+    }
+
+    if(0){
+        end:
+        printf("Falha ao criar o objeto JSON.\n");
+    }
+    
+    cJSON_Delete(query.wrapper);
+
+    return string;
+}
+
+char* removeJson(Profile profile){
+    //Create JSON object
+    JSONprofile JSONprofileCreate;
+    JSONquery query;
+
+    char *string = NULL;
+
+    query.wrapper = cJSON_CreateObject();
+    if (query.wrapper == NULL){
+        goto end;
+    }
+
+    //OPERATION
+    query.operation = cJSON_CreateString("REMOVE");
+    if (query.operation == NULL){
+        goto end;
+    }
+    /* after creation was successful, immediately add it to the monitor,
+     * thereby transferring ownership of the pointer to it */
+    cJSON_AddItemToObject(query.wrapper, "operation", query.operation);
+
+    //PROFILE OBJECT
+    query.object = cJSON_CreateObject();
+    if (query.object == NULL){
+        goto end;
+    }
+    cJSON_AddItemToObject(query.wrapper, "object", query.object);
+
+    //EMAIL
+    JSONprofileCreate.email = cJSON_CreateString(profile.email);
+    if (JSONprofileCreate.email == NULL){
+        goto end;
+    }
+    cJSON_AddItemToObject(query.object, "email", JSONprofileCreate.email);
+
+    //JSONfy to string
+    string = cJSON_Print(query.wrapper);
+    if (string == NULL)
+    {
+        fprintf(stderr, "Objeto JSON não pôde ser exibido.\n");
+    }
+
+    if(0){
+        end:
+        printf("Falha ao criar o objeto JSON.\n");
+    }
+    
+    cJSON_Delete(query.wrapper);
+
+    return string;
+}
+
+/*
+ * 
+ * O parâmetro caracter pode ser:
+ *      - a -> ListAll - listar todos os perfis
+ *      - u -> ListUser - listar usuário expecífico
+ *      - e -> ListEducation - listar usuários com certa experiência
+ *      - s -> ListSkill - listar usuário com certa habilidade
+ *      - y -> ListYear - listar usuáris com certo ano (Year) de conclusão
+ * 
+    */
+char* listJson(char operation, char* string){
+    //Create JSON object
+    JSONprofile JSONprofileCreate;
+    JSONquery query;
+
+    char *retorno = NULL;
+    char op[15], field[100];
+
+    query.wrapper = cJSON_CreateObject();
+    if (query.wrapper == NULL){
+        goto end;
+    }
+
+    switch (operation)
+    {
+    case 'a':
+        strcpy(op, "ListAll");
+        strcpy(field, "none");
+        break;
+
+    case 'u':
+        strcpy(op, "ListUser");
+        strcpy(field, "email");
+        break;
+
+    case 'e':
+        strcpy(op, "ListEducation");
+        strcpy(field, "education");
+        break;
+
+    case 's':
+        strcpy(op, "ListSkill");
+        strcpy(field, "skill");
+        break;
+
+    case 'y':
+        strcpy(op, "ListYear");
+        strcpy(field, "graduationYear");
+        break;
+
+    
+    default:
+        printf("Erro\n");
+        goto end;
+        break;
+    }
+
+    //OPERATION
+    query.operation = cJSON_CreateString(op);
+    if (query.operation == NULL){
+        goto end;
+    }
+    /* after creation was successful, immediately add it to the monitor,
+     * thereby transferring ownership of the pointer to it */
+    cJSON_AddItemToObject(query.wrapper, "operation", query.operation);
+
+    //PROFILE OBJECT
+    query.object = cJSON_CreateObject();
+    if (query.object == NULL){
+        goto end;
+    }
+    cJSON_AddItemToObject(query.wrapper, "object", query.object);
+
+    //Pode ser Qualquer coisa!! o que muda é o field
+    JSONprofileCreate.email = cJSON_CreateString(string);
+    if (JSONprofileCreate.email == NULL){
+        goto end;
+    }
+    cJSON_AddItemToObject(query.object, field, JSONprofileCreate.email);
+
+    //JSONfy to string
+    retorno = cJSON_Print(query.wrapper);
+    if (retorno == NULL)
+    {
+        fprintf(stderr, "Objeto JSON não pôde ser exibido.\n");
+    }
+
+    if(0){
+        end:
+        printf("Falha ao criar o objeto JSON.\n");
+    }
+    
+    cJSON_Delete(query.wrapper);
+
+    return retorno;
 }

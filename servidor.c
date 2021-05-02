@@ -33,16 +33,24 @@ int main(){
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(50000);
     server_address.sin_addr.s_addr = INADDR_ANY;
+    unsigned int len;
+    len = sizeof(server_address);
+
+    //define client adrr
+    struct sockaddr client_address;
+
 
     //bind the socket to IP and port
-    bind(serverSocket, (sockaddr *) &server_address, sizeof(server_address));
+    bind(serverSocket, (sockaddr *) &server_address, len);
 
-    listen(serverSocket, 1); //can have 1 connection waiting at max
+    listen(serverSocket, 5); //can have 1 connection waiting at max
 
     //accept client connection
-    clientSocket = accept(serverSocket, NULL, NULL); //-> substituir valores de null por outras estruturas se quiser pegar o endereço do cliente
     
     while(1){
+
+        clientSocket = accept(serverSocket, (struct sockaddr *) &client_address, &len); //-> substituir valores de null por outras estruturas se quiser pegar o endereço do cliente
+
         //receive message from client
         status = recv(clientSocket, &request, sizeof(request), 0);
         if(status < 0){
@@ -52,14 +60,12 @@ int main(){
         printf("The client has requested: %s", request);
 
         //send message
-        status = send(clientSocket, &request, sizeof(request), 0);
+        status = send(clientSocket, &serverMessage, sizeof(serverMessage), 0);
 		if(status < 0){
 			printf("Send failed, error code %d\n", status);
 			return 1;
 		}
 		
-		
-
     }
 
 
@@ -70,7 +76,7 @@ int main(){
     //send(clientSocket, &request, sizeof(request), 0);
 
     //close socket
-    close(serverSocket);
+    close(clientSocket);
 
     //createProfile("felipe@example.com", "Felipe", "Tiago", "Disneyland, Orlando", "Counter Strike University", "2022");
     //createProfile("gabriel@example.com", "Gabriel", "Silveira", "Unicamp, Barão Geraldo", "Counter Strike University", "2022");

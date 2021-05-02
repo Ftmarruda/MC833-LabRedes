@@ -22,9 +22,11 @@ int serverSocket;
 struct sockaddr_in server_address;
 char request[256], response[256];
 
+
 bool createProfile();
 bool addExperience();
 bool addSkill();
+bool list();
 bool listProfilesBasedOnSkill();
 bool listProfilesBasedOnEducation();
 bool listProfilesBasedOnGraduationYear();
@@ -69,15 +71,15 @@ bool createProfile(){
     printf("-----------------Aguarde-----------------\n\n");
     
     //CRIA STRINGS JSON PARA AS REQUESTS AO SERVIDOR
-    char* json = create(profile);
+    char* json = createJson(profile);
     printf("%s\n", json);
 
     status = 0;
-    while(status < sizeof(profile)){
-        status = send(serverSocket, &json, sizeof(json), 0);
+
+        status = send(serverSocket, &request, sizeof(json), 0);
         printf("%ld\n", status);
         printf("%ld\n", sizeof(profile));
-    }
+
     if(status < 0){
         printf("Send failed, error code %ld\n", status);
         return false;
@@ -96,54 +98,61 @@ bool createProfile(){
 }
 
 bool addExperience(){
-    char email[30], **professionalExperience, aux[MAX_CARAC];
-    int num_experiencias;
+    Profile profile;
+    char** experience;
+    char aux[MAX_CARAC];
+    int num_experiences;
+
     printf("\n\n------------------------------------------");
     printf("\n    2. Adicionar experiência à perfil\n");
     printf("------------------------------------------\n\n");
 
     printf("-> Insira o email do perfil: ");
-    scanf("%s", email);
+    scanf("%s", profile.email);
     
-    printf("-> Quantas experiências você gostaria de adicionar?\nR: ");
-    scanf("%d", &num_experiencias);
-    professionalExperience = calloc(num_experiencias, sizeof(char*));
+    printf("-> Quantas experiências você gostaria de adicionarà %s?\nR: ", profile.email);
+    scanf("%d", &num_experiences);
+    experience = calloc(num_experiences, sizeof(char*));
 
     int i;
-    for(i = 0; i < num_experiencias; i++){
-        professionalExperience[i] = calloc(MAX_CARAC, sizeof(char));
+    for(i = 0; i < num_experiences; i++){
+        experience[i] = calloc(MAX_CARAC, sizeof(char));
         printf("-> Insira a %d° experiência profissonal do perfil: ", i+1);
         scanf("%s", aux);
         if(sizeof(aux) > MAX_CARAC){
             printf("ERRO!!!! Número de caracteres excede o máximo permitido de %d caracteres. Tente novamente :)\n", MAX_CARAC);
             i--;
         }else{
-            strcpy(professionalExperience[i], aux);
-            printf("%s\n", professionalExperience[i]);
+            strcpy(experience[i], aux);
         }    
     }
     
-    //Tratar os dados de professional experience para enviar ao servidor
+    profile.experience = (const char * const*)experience;
 
     printf("\n\nEnviando informações ao servidor\n");
     printf("-----------------Aguarde-----------------\n\n");
 
-    //COMUNICAÇÂO COM O SERVIDOR
+    //Tratamento dos dados e comunicação com o servidor
+    char* json = addExperienceJson(profile, num_experiences);
+    printf("%s\n", json);
 
     return true;
 }
 
 bool addSkill(){
-    char email[30], **skill, aux[MAX_CARAC];
+    Profile profile;
+    char** skill;
+    char aux[MAX_CARAC];
     int num_skills;
+
     printf("\n\n------------------------------------------");
     printf("\n    3. Adicionar habilidade à perfil\n");
     printf("------------------------------------------\n\n");
 
     printf("-> Insira o email do perfil: ");
-    scanf("%s", email);
+    scanf("%s", profile.email);
 
-    printf("-> Quantas habilidades você gostaria de adicionar à %s?\nR: ", email);
+    printf("-> Quantas habilidades você gostaria de adicionar à %s?\nR: ", profile.email);
     scanf("%d", &num_skills);
     skill = calloc(num_skills, sizeof(char*));
 
@@ -160,17 +169,20 @@ bool addSkill(){
             printf("%s\n", skill[i]);
         }    
     }
+    profile.skills = (const char * const*)skill;
 
     printf("\n\nEnviando informações ao servidor\n");
     printf("-----------------Aguarde-----------------\n\n");
 
     //Tratamento dos dados e comunicação com o servidor
+    char* json = addSkillJson(profile, num_skills);
+    printf("%s\n", json);
 
     return true;
 }
 
 bool readProfile(){
-    char *email;
+    char email[MAX_CARAC];
     printf("\n\n------------------------------------------");
     printf("\n    a. Ler perfil a partir de email\n");
     printf("------------------------------------------\n\n");
@@ -182,6 +194,8 @@ bool readProfile(){
     printf("-----------------Aguarde-----------------\n\n");
 
     //Tratamento dos dados e comunicação com o servidor
+    char* json = listJson('u', email);
+    printf("%s\n", json);
 
     return true;
 }
@@ -196,6 +210,8 @@ bool listAllProfiles(){
     printf("-----------------Aguarde-----------------\n\n");
 
     //Tratamento dos dados e comunicação com o servidor
+    char* json = listJson('a', "ALL");
+    printf("%s\n", json);
 
     return true;
 }
@@ -214,6 +230,8 @@ bool listProfilesBasedOnSkill(){
     printf("-----------------Aguarde-----------------\n\n");
 
     //Tratamento dos dados e comunicação com o servidor
+    char* json = listJson('s', skill);
+    printf("%s\n", json);
 
     return true;
 }
@@ -232,6 +250,8 @@ bool listProfilesBasedOnEducation(){
     printf("-----------------Aguarde-----------------\n\n");
 
     //Tratamento dos dados e comunicação com o servidor
+    char* json = listJson('e', education);
+    printf("%s\n", json);
 
     return true;
 }
@@ -249,7 +269,9 @@ bool listProfilesBasedOnGraduationYear(){
     printf("\n\nEnviando informações ao servidor\n");
     printf("-----------------Aguarde-----------------\n\n");
 
-    //Tratamento dos dados e comunicação com o servidor
+     //Tratamento dos dados e comunicação com o servidor
+    char* json = listJson('y', graduationYear);
+    printf("%s\n", json);
 
     return true;
 }
@@ -273,7 +295,6 @@ bool list(){
                 "Digite o número da opção que deseja realizar: "
         );
         scanf("%c", &letter);
-        cleanBuffer(); //we clean the buffer here
         switch (letter)
         {
         case 'a'://ler perfil a partir de email
@@ -302,7 +323,7 @@ bool list(){
             break;
 
         case 'f'://retornar a menu principal
-            printf("----Retornando a menu principal...----\n\n");
+            printf("\n\n----Retornando a menu principal...----\n\n");
             flag = 0;
             break;    
 
@@ -310,29 +331,31 @@ bool list(){
             printf("\n\n------------------------------------------\n");
             printf("--------------Opção-Invalida--------------\n");
             printf("------------------------------------------\n\n");
+            cleanBuffer(); //we clean the buffer here
             break;
         }
         
     }
-    cleanBuffer();
     return retorno;
 }
 
 bool removeProfile(){
-    char email[30];
+    Profile profile;
     printf("\n\n------------------------------------------");
     printf("\n        5. Remover perfil\n");
     printf("------------------------------------------\n\n");
 
     printf("-> Insira o email do perfil que deseja remover: ");
-    scanf("%s", email);
+    scanf("%s", profile.email);
 
 
 
     printf("\n\nEnviando informações ao servidor\n");
     printf("-----------------Aguarde-----------------\n\n");
-    //Tratamento dos dados e comunicação com o servidor
 
+     //Tratamento dos dados e comunicação com o servidor
+    char* json = removeJson(profile);
+    printf("%s\n", json);
 
     return true;
 }

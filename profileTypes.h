@@ -7,6 +7,6 @@ typedef struct Profile {
     char address[100];
     char education[100];
     char graduationYear[4];
-    char **experience; //vetor de experiencias
-    char **skills; //vetor de skills
+    const char *const *experience; //vetor de experiencias
+    const char *const *skills; //vetor de skills
 } Profile; 
