@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -12,11 +13,12 @@
 #include <arpa/inet.h>
 
 #include <sqlite3.h>
-#include "dao.h"
 
-#include "../lib/profileTypes.h"
+#include "jsonParser.h"
 
 #define MAX_SIZE 256
+
+void emergencyExit();
 
 int main(){
 
@@ -24,8 +26,8 @@ int main(){
     typedef struct sockaddr sockaddr;
     ssize_t n;
 
+    int serverSocket = 0, clientSocket = 0;
     char serverMessage[MAX_SIZE], request[MAX_SIZE];
-    int serverSocket, clientSocket;
 
     strcpy(serverMessage, "BEM-VINDO AO SUPERPAPO");
     //create the server socket
@@ -60,7 +62,13 @@ int main(){
             while ( (n = recv(clientSocket, request, 600, 0)) > 0){
                 printf("The client has requested: %s", request);
                 printf("buffer size: %ld\n", n);
-                strcpy(serverMessage, "Usuario Criado\n");
+
+                if(!parse(request)){
+                    strcpy(serverMessage, "The request failed!\n");
+                }else{
+                    strcpy(serverMessage, "Request processed succesfully!\n");
+                }
+                
                 send(clientSocket, serverMessage, sizeof(serverMessage), 0);
 
                 if (n < 0 && errno == 4)

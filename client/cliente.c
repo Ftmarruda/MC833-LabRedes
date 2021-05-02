@@ -1,11 +1,9 @@
-
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <signal.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -14,7 +12,13 @@
 #include <arpa/inet.h>
 #include "client_requests.h"
 
+void emergencyExit();
+
 int main(){
+
+    //O que acontece quando eu aperto ^C
+    signal(SIGINT, emergencyExit);
+
     char string[] = "Connect\n\0";
     strcpy(request, string);
     strcpy(response, "\0");
@@ -109,5 +113,13 @@ int main(){
         }
         cleanBuffer();
     }
+
     return 0;
+}
+
+//O que acontece quando eu aperto ^C
+void emergencyExit(){
+    printf("\nDesconectando do servidor...\n");
+    close(serverSocket);
+    exit(0);
 }

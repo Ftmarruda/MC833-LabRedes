@@ -28,6 +28,12 @@ char* addExperienceJson(Profile profile, int len);
 char* removeJson(Profile profile);
 char* listJson(char operation, char* string);
 
+/*
+----------------------------
+--------   CREATE   --------
+----------------------------
+*/
+
 char* createJson(Profile profile){
     //Create JSON object
     JSONprofile JSONprofileCreate;
@@ -117,6 +123,12 @@ char* createJson(Profile profile){
 
 }
 
+/*
+-------------------------------
+--------   ADD SKILL   --------
+-------------------------------
+*/
+
 char* addSkillJson(Profile profile, int len){
     //Create JSON object
     JSONprofile JSONprofileCreate;
@@ -177,6 +189,12 @@ char* addSkillJson(Profile profile, int len){
     return string;
 }
 
+/*
+------------------------------------
+--------   ADD EXPERIENCE   --------
+------------------------------------
+*/
+
 char* addExperienceJson(Profile profile, int len){
     //Create JSON object
     JSONprofile JSONprofileCreate;
@@ -236,6 +254,12 @@ char* addExperienceJson(Profile profile, int len){
     return string;
 }
 
+/*
+----------------------------
+--------   DELETE   --------
+----------------------------
+*/
+
 char* removeJson(Profile profile){
     //Create JSON object
     JSONprofile JSONprofileCreate;
@@ -287,6 +311,12 @@ char* removeJson(Profile profile){
 
     return string;
 }
+
+/*
+--------------------------
+--------   LIST   --------
+--------------------------
+*/
 
 /*
  * 

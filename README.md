@@ -1,6 +1,10 @@
 # To-do
 
-[ ] Instruções sobre como digitar o IP local do servidor. Pode colocar como argumento pra execuçãp do programa tb.
+- [ ] Instruções sobre como digitar o IP local do servidor. Pode colocar como argumento pra execuçãp do programa tb.
+- [ ] Passar o caminho do banco como parametro
+- [ ] Documentar as mensagens JSON e seus formatos
+- [ ] Falar como se desconectar corretamente do servidor -> configurar fechamento seguro com control+c
+
 
 # MC833-LabRedes
 Laboratório Pratico de redes
@@ -22,7 +26,7 @@ Desenvolvido por Fe e Silvs
 >```gcc -std=c99 -pedantic -Wall -o ./bin/cliente ./client/cliente.c ./lib/cJSON.c```
 
 * Para compilar o servidor, utilize o seguinte comando na raiz do projeto:
->```gcc -std=c99 -pedantic -Wall -o ./bin/servidor ./server/servidor.c -lsqlite3```
+>```gcc -std=c99 -pedantic -Wall -o ./bin/servidor ./server/servidor.c ./lib/cJSON.c -lsqlite3``
 
 # Execução
 Em um terminal na raiz do projeto, rode primeiramente ```./bin/servidor``` para executar o programa do servidor. Da mesma forma, rode em um outro terminal ```./bin/cliente``` para executar a aplicação do cliente.

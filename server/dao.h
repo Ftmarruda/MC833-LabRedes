@@ -1,4 +1,9 @@
-bool createProfile(char email[30], char name[30], char surname[30], char address[100], char education[100], char graduationYear[4]);
+#include<sqlite3.h>
+#include<stdio.h>
+
+#define QUERY_MAX_SIZE 512
+
+bool createProfile (Profile profile);
 bool addExperience(char email[30], char professionalExperience[100]);
 bool addSkill(char email[30], char skill[100]);
 bool listProfilesBasedOnSkill(char skill[100]);
@@ -9,12 +14,18 @@ bool readProfile(char *email);
 bool removeProfile(char *email);
 int callback(void *, int, char **, char **);
 
-bool createProfile (char email[30], char name[30], char surname[30], char address[100], char education[100], char graduationYear[4]){
+/*
+----------------------------
+--------   CREATE   --------
+----------------------------
+*/
+
+bool createProfile (Profile profile){
    
     sqlite3 *db;
     char *err_msg = 0;
     
-    int rc = sqlite3_open("app.db", &db);
+    int rc = sqlite3_open("../server/app.db", &db); //caminho relativo à onde você executa o programa no terminal
     
     if (rc != SQLITE_OK) {
         
@@ -25,23 +36,24 @@ bool createProfile (char email[30], char name[30], char surname[30], char addres
     }
     
     //Query
+    char sql[QUERY_MAX_SIZE];
+    strcpy(sql, "INSERT INTO Profiles VALUES('");
+    strcat(sql, profile.email);
+    strcat(sql, "', '");
+    strcat(sql, profile.name);
+    strcat(sql, "', '");
+    strcat(sql, profile.surname);
+    strcat(sql, "', '");
+    strcat(sql, profile.address);
+    strcat(sql, "', '");
+    strcat(sql, profile.education);
+    strcat(sql, "', '");
+    strcat(sql, profile.graduationYear);
+    strcat(sql, "');");
 
-    char sql[200];
-    strcpy(sql, "INSERT OR IGNORE INTO Profiles VALUES('");
-    strcat(sql, email);
-    strcat(sql, "', '");
-    strcat(sql, name);
-    strcat(sql, "', '");
-    strcat(sql, surname);
-    strcat(sql, "', '");
-    strcat(sql, address);
-    strcat(sql, "', '");
-    strcat(sql, education);
-    strcat(sql, "', ");
-    strcat(sql, graduationYear);
-    strcat(sql, ");");
+    printf("Query:\n%s\n", sql);
 
-    sqlite3_exec(db, sql, 0, 0, &err_msg);
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK ) {
         
@@ -56,6 +68,12 @@ bool createProfile (char email[30], char name[30], char surname[30], char addres
 
     return true;
 }
+
+/*
+------------------------------------
+--------   ADD EXPERIENCE   --------
+------------------------------------
+*/
 
 bool addExperience(char email[30], char experience[100]){
     
@@ -73,14 +91,14 @@ bool addExperience(char email[30], char experience[100]){
     }
 
     //Query
-    char sql[200];
-    strcpy(sql, "INSERT OR IGNORE INTO Experiences VALUES(NULL, '");
+    char sql[QUERY_MAX_SIZE];
+    strcpy(sql, "INSERT INTO Experiences VALUES(NULL, '");
     strcat(sql, email);
     strcat(sql, "', '");
     strcat(sql, experience);
     strcat(sql, "');");
 
-    sqlite3_exec(db, sql, 0, 0, &err_msg);
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK ) {
         
@@ -95,6 +113,12 @@ bool addExperience(char email[30], char experience[100]){
 
     return true;
 }
+
+/*
+-------------------------------
+--------   ADD SKILL   --------
+-------------------------------
+*/
 
 bool addSkill(char email[30], char skill[100]){
 
@@ -114,12 +138,12 @@ bool addSkill(char email[30], char skill[100]){
 
     //Query 1
 
-    sql = malloc(200*sizeof(char));
-    strcpy(sql, "INSERT OR IGNORE INTO Skills VALUES('");
+    sql = (char *) malloc(QUERY_MAX_SIZE*sizeof(char));
+    strcpy(sql, "INSERT INTO Skills VALUES('");
     strcat(sql, skill);
     strcat(sql, "');");
 
-    sqlite3_exec(db, sql, 0, 0, &err_msg);
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK ) {
         
@@ -133,8 +157,8 @@ bool addSkill(char email[30], char skill[100]){
     free(sql);
 
     //Query 2
-    sql = malloc(200*sizeof(char));;
-    strcpy(sql, "INSERT OR IGNORE INTO Profiles_Skills VALUES('");
+    sql = (char *) malloc(QUERY_MAX_SIZE*sizeof(char));;
+    strcpy(sql, "INSERT INTO Profiles_Skills VALUES('");
     strcat(sql, email);
     strcat(sql, "', '");
     strcat(sql, skill);
@@ -143,7 +167,7 @@ bool addSkill(char email[30], char skill[100]){
 
     strcat(sql, "");
 
-    sqlite3_exec(db, sql, 0, 0, &err_msg);
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK ) {
         
@@ -161,6 +185,12 @@ bool addSkill(char email[30], char skill[100]){
     return true;
 }
 
+/*
+---------------------------------------------
+--------   LIST BASED ON EDUCATION   --------
+---------------------------------------------
+*/
+
 bool listProfilesBasedOnEducation(char education[100]){
     sqlite3 *db;
     char *err_msg = 0;
@@ -176,7 +206,7 @@ bool listProfilesBasedOnEducation(char education[100]){
         return false;
     }
     
-    char sql[200];
+    char sql[QUERY_MAX_SIZE];
     strcpy(sql, "SELECT * FROM Profiles WHERE Education == '");
     strcat(sql, education);
     strcat(sql, "';");
@@ -200,6 +230,12 @@ bool listProfilesBasedOnEducation(char education[100]){
     return true;
 }
 
+/*
+-----------------------------------------
+--------   LIST BASED ON SKILL   --------
+-----------------------------------------
+*/
+
 bool listProfilesBasedOnSkill(char skill[300]){
     sqlite3 *db;
     char *err_msg = 0;
@@ -215,7 +251,7 @@ bool listProfilesBasedOnSkill(char skill[300]){
         return false;
     }
     
-    char sql[200];
+    char sql[QUERY_MAX_SIZE];
     strcpy(sql, "SELECT * FROM Profiles_Skills, Profiles WHERE Profiles_Skills.Profile_Email = Profiles.Email AND Skill_Description == '");
     strcat(sql, skill);
     strcat(sql, "';");
@@ -239,6 +275,12 @@ bool listProfilesBasedOnSkill(char skill[300]){
     return true;
 }
 
+/*
+---------------------------------------------------
+--------   LIST BASED ON GRADUATION YEAR   --------
+---------------------------------------------------
+*/
+
 bool listProfilesBasedOnGraduationYear(char graduationYear[4]){
     sqlite3 *db;
     char *err_msg = 0;
@@ -254,7 +296,7 @@ bool listProfilesBasedOnGraduationYear(char graduationYear[4]){
         return false;
     }
     
-    char sql[200];
+    char sql[QUERY_MAX_SIZE];
     strcpy(sql, "SELECT * FROM Profiles WHERE Graduation_Year == ");
     strcat(sql, graduationYear);
     strcat(sql, ";");
@@ -277,6 +319,12 @@ bool listProfilesBasedOnGraduationYear(char graduationYear[4]){
     
     return true;
 }
+
+/*
+---------------------------------------
+--------   LIST ALL PROFILES   --------
+---------------------------------------
+*/
 
 bool listAllProfiles(){
 
@@ -315,6 +363,12 @@ bool listAllProfiles(){
 
 }
 
+/*
+----------------------------------
+--------   LIST PROFILE   --------
+----------------------------------
+*/
+
 bool readProfile(char *email){
 
     sqlite3 *db;
@@ -331,7 +385,7 @@ bool readProfile(char *email){
         return false;
     }
     
-    char sql[200];
+    char sql[QUERY_MAX_SIZE];
     strcpy(sql, "SELECT * FROM Profiles WHERE Email == '");
     strcat(sql, email);
     strcat(sql, "';");
@@ -355,6 +409,12 @@ bool readProfile(char *email){
     return true;
 }
 
+/*
+-------------------------------------
+--------   REMOVE EDUCATION  --------
+-------------------------------------
+*/
+
 bool removeProfile(char *email){
     
     sqlite3 *db;
@@ -373,7 +433,7 @@ bool removeProfile(char *email){
 
     sqlite3_exec(db, "PRAGMA foreign_keys = ON", callback, 0, &err_msg);
     
-    char sql[200];
+    char sql[QUERY_MAX_SIZE];
     strcpy(sql, "DELETE FROM Profiles WHERE Email == '");
     strcat(sql, email);
     strcat(sql, "';");
@@ -396,6 +456,12 @@ bool removeProfile(char *email){
     return true;
 
 }
+
+/*
+----------------------------------------
+--------   AUXILIARY FUNCTIONS  --------
+----------------------------------------
+*/
 
 //prints query results
 int callback(void *NotUsed, int argc, char **argv, 
