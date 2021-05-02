@@ -14,20 +14,10 @@
 #include <arpa/inet.h>
 #include "client_requests.h"
 
-/*typedef struct Profile {
-    char email[30];
-    char name[30];
-    char surname[30];
-    char address[100];
-    char education[100];
-    char graduationYear[4];
-    Experience *experience[100]; //vetor de experiencias
-    Skill *skills[100]; //vetor de skills
-} Profile;*/
-
 int main(){
-
-    strcpy(request, "Connect\n");
+    char string[] = "Connect\n";
+    request = malloc(sizeof(string));
+    strcpy(request, string);
     strcpy(response, "\0");
 
     printf("Conectando ao servidor.....\n");
@@ -48,7 +38,9 @@ int main(){
         return 1;
     }
 
-    printf("Servidor Conectado!\n");
+    status = send(serverSocket, request, sizeof(request), 0);
+    status = recv(serverSocket, response, sizeof(response), 0);
+    printf("%s \nServidor Conectado!\n", response);
 
     char op = '0';
     bool flag = true;

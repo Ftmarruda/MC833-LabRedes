@@ -1,6 +1,7 @@
 //CRIA STRINGS JSON PARA AS REQUESTS AO SERVIDOR
 
 #include <stdio.h>
+#include <string.h>
 #include "../lib/cJSON.h"
 #include "../lib/profileTypes.h"
 
@@ -99,7 +100,7 @@ char* createJson(Profile profile){
     cJSON_AddItemToObject(query.object, "graduationYear", JSONprofileCreate.graduationYear);
 
     //JSONfy to string
-    string = cJSON_Print(query.wrapper);
+    string = cJSON_PrintUnformatted(query.wrapper);
     if (string == NULL)
     {
         fprintf(stderr, "Objeto JSON não pôde ser exibido.\n");
@@ -160,7 +161,7 @@ char* addSkillJson(Profile profile, int len){
     
 
     //JSONfy to string
-    string = cJSON_Print(query.wrapper);
+    string = cJSON_PrintUnformatted(query.wrapper);
     if (string == NULL)
     {
         fprintf(stderr, "Objeto JSON não pôde ser exibido.\n");
@@ -219,7 +220,7 @@ char* addExperienceJson(Profile profile, int len){
     cJSON_AddItemToObject(query.object, "experiences", JSONprofileCreate.experience);
 
     //JSONfy to string
-    string = cJSON_Print(query.wrapper);
+    string = cJSON_PrintUnformatted(query.wrapper);
     if (string == NULL)
     {
         fprintf(stderr, "Objeto JSON não pôde ser exibido.\n");
@@ -271,7 +272,7 @@ char* removeJson(Profile profile){
     cJSON_AddItemToObject(query.object, "email", JSONprofileCreate.email);
 
     //JSONfy to string
-    string = cJSON_Print(query.wrapper);
+    string = cJSON_PrintUnformatted(query.wrapper);
     if (string == NULL)
     {
         fprintf(stderr, "Objeto JSON não pôde ser exibido.\n");
@@ -368,7 +369,7 @@ char* listJson(char operation, char* string){
     cJSON_AddItemToObject(query.object, field, JSONprofileCreate.email);
 
     //JSONfy to string
-    retorno = cJSON_Print(query.wrapper);
+    retorno = cJSON_PrintUnformatted(query.wrapper);
     if (retorno == NULL)
     {
         fprintf(stderr, "Objeto JSON não pôde ser exibido.\n");

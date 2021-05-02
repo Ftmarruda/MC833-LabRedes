@@ -2,14 +2,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <string.h>
 #include <unistd.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include "JSONfier.h"
+#include "JSONfier_client.h"
 
 
 typedef struct sockaddr_in sockaddr_in;
@@ -18,7 +17,7 @@ typedef struct sockaddr sockaddr;
 //Global variables
 int serverSocket;
 struct sockaddr_in server_address;
-char request[256], response[256];
+char *request, response[256];
 
 
 bool createProfile();
@@ -31,7 +30,15 @@ bool listProfilesBasedOnGraduationYear();
 bool listAllProfiles();
 bool readProfile();
 bool removeProfile();
+void formatJson(char* json);
 void cleanBuffer();
+
+void formatJson(char* json){
+    int n = sizeof(json);
+    json = realloc(json, n+1);
+    json[n] = '\n';
+    return;
+}
 
 void cleanBuffer(){
     int n;
@@ -68,14 +75,17 @@ bool createProfile(){
     printf("-----------------Aguarde-----------------\n\n");
     
     //CRIA STRINGS JSON PARA AS REQUESTS AO SERVIDOR
-    char* json = createJson(profile);
+    char* json = (char*) createJson(profile);
+    size_t n = sizeof(json);
+    //formatJson(json);
     printf("%s\n", json);
-
+    printf("n: %ld\n", n);
+    request = realloc(request, sizeof(json));
     status = 0;
-
-        status = send(serverSocket, &request, sizeof(json), 0);
-        printf("%ld\n", status);
-        printf("%ld\n", sizeof(profile));
+    strcpy(request, "Criar usuário\n");
+    status = send(serverSocket, json, 135, 0);
+    printf("%ld\n", status);
+    printf("%ld\n", sizeof(json));
 
     if(status < 0){
         printf("Send failed, error code %ld\n", status);

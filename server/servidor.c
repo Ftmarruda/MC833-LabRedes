@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -19,11 +20,11 @@ int main(){
 
     typedef struct sockaddr_in sockaddr_in;
     typedef struct sockaddr sockaddr;
+    ssize_t     n;
 
     char serverMessage[256], request[256];
-    int serverSocket, clientSocket, status;
+    int serverSocket, clientSocket;
 
-    strcpy(request, "\0");
     strcpy(serverMessage, "BEM-VINDO AO SUPERPAPO");
     //create the server socket
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -43,29 +44,28 @@ int main(){
     //bind the socket to IP and port
     bind(serverSocket, (sockaddr *) &server_address, len);
 
-    listen(serverSocket, 5); //can have 1 connection waiting at max
+    listen(serverSocket, 1); //can have 1 connection waiting at max
 
     //accept client connection
     
-    while(1){
+    while(clientSocket != -1){
 
         clientSocket = accept(serverSocket, (struct sockaddr *) &client_address, &len); //-> substituir valores de null por outras estruturas se quiser pegar o endereço do cliente
+        printf("client socket: %d\n", clientSocket);
+        close(serverSocket);
 
+        again:
+            while ( (n = recv(clientSocket, request, 1000, 0)) > 0){
+                printf("The client has requested: %s", request);
+                send(clientSocket, request, n, 0);
+
+                if (n < 0 && errno == 4)
+                    goto again;
+                else if (n < 0)
+                    printf("str_echo: recv error");
+            }
         //receive message from client
-        status = recv(clientSocket, &request, sizeof(request), 0);
-        if(status < 0){
-			printf("Recv failed, error code %d\n", status);
-		}
-
-        printf("The client has requested: %s", request);
-
-        //send message
-        status = send(clientSocket, &serverMessage, sizeof(serverMessage), 0);
-		if(status < 0){
-			printf("Send failed, error code %d\n", status);
-			return 1;
-		}
-		
+        close(clientSocket);	
     }
 
 
@@ -76,7 +76,7 @@ int main(){
     //send(clientSocket, &request, sizeof(request), 0);
 
     //close socket
-    close(clientSocket);
+    
 
     //createProfile("felipe@example.com", "Felipe", "Tiago", "Disneyland, Orlando", "Counter Strike University", "2022");
     //createProfile("gabriel@example.com", "Gabriel", "Silveira", "Unicamp, Barão Geraldo", "Counter Strike University", "2022");
