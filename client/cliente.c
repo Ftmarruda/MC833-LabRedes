@@ -17,7 +17,7 @@ void emergencyExit();
 int main(int argc, char *argv[ ]){
     
     if (argc != 2){
-        printf("Erro de execução, olhe o README para mais informações");
+        printf("Erro de execução, olhe o README para mais informações!!\n");
         exit(1);
     }
 

@@ -1,7 +1,7 @@
 # To-do
 
 - [X] Instruções sobre como digitar o IP local do servidor. Pode colocar como argumento pra execuçãp do programa tb.
-- [ ] Passar o caminho do banco como parametro
+- [X] Passar o caminho do banco como parametro
 - [ ] Documentar as mensagens JSON e seus formatos
 - [ ] Falar como se desconectar corretamente do servidor -> configurar fechamento seguro com control+c
 
@@ -29,7 +29,7 @@ Desenvolvido por Fe e Silvs
 >```gcc -std=c99 -pedantic -Wall -o ./bin/servidor ./server/servidor.c ./lib/cJSON.c -lsqlite3```
 
 # Execução
-Primeiramente você deve ligar o servidor, pegando seu ip. Para isso, em um terminal para o servidor rode ```hostname -I```, isso deve retornar um ip. Após isso, rode o executável do servidor por ```./bin/servidor```.
+Primeiramente você deve ligar o servidor, pegando seu ip. Para isso, em um terminal para o servidor rode ```hostname -I```, isso deve retornar um ip. Após isso, rode o executável do servidor por ```./bin/servidor server/app.db```, onde "server/app.db" é o caminho relativo do terminal ao banco de dados do servidor.
 Com o servidor ligado e tendo seu ip em mãos, podemos rodar a aplicação do cliente por ```./bin/cliente ip```, onde ip é a exatamente o ip retornado por ```hostname -I``
 
 ## Utilizando SQLite3 com C:
@@ -38,7 +38,7 @@ Para compilar programas contendo a biblioteca __sqlite3.h__, utilize a flag ```-
 
 **Por exemplo:**
 
->```gcc -std=c99 -pedantic -Wall -o ./bin/servidor ./server/servidor.c -lsqlite3 ```
+>```gcc -std=c99 -pedantic -Wall -o ./bin/servidor ./server/servidor.c ./lib/cJSON.c -lsqlite3```
 
 Se ainda persistirem os erros, executar o seguinte comando:
 

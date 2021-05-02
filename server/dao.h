@@ -3,6 +3,8 @@
 
 #define QUERY_MAX_SIZE 512
 
+char* server_path;
+
 bool createProfile (Profile profile);
 bool addExperience(char email[30], char professionalExperience[100]);
 bool addSkill(char email[30], char skill[100]);
@@ -25,7 +27,7 @@ bool createProfile (Profile profile){
     sqlite3 *db;
     char *err_msg = 0;
     
-    int rc = sqlite3_open("../server/app.db", &db); //caminho relativo à onde você executa o programa no terminal
+    int rc = sqlite3_open(server_path, &db); //caminho relativo à onde você executa o programa no terminal
     
     if (rc != SQLITE_OK) {
         

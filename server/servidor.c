@@ -20,8 +20,18 @@
 
 void emergencyExit();
 
-int main(){
 
+
+int main(int argc, char *argv[ ]){
+
+    if (argc != 2){
+        printf("Erro de execução, olhe o README para mais informações!!\n");
+        exit(1);
+    }
+    server_path = malloc((sizeof(argv[1])*sizeof(char))+1);
+    strcpy(server_path, argv[1]);
+    printf("%s", server_path);
+    
     typedef struct sockaddr_in sockaddr_in;
     typedef struct sockaddr sockaddr;
     ssize_t n;
