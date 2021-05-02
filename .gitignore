@@ -11,6 +11,8 @@
 # Ignore `bin` dir
 bin/*
 
+!bin/README_BIN.md
+
 # Compiled source #
 ###################
 *.com
