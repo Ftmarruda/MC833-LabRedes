@@ -14,7 +14,12 @@
 
 void emergencyExit();
 
-int main(){
+int main(int argc, char *argv[ ]){
+    
+    if (argc != 2){
+        printf("Erro de execução, olhe o README para mais informações");
+        exit(1);
+    }
 
     //O que acontece quando eu aperto ^C
     signal(SIGINT, emergencyExit);
@@ -31,7 +36,7 @@ int main(){
     //socket address
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(50000);
-    server_address.sin_addr.s_addr = INADDR_ANY;//inet_addr("172.30.161.224"); //o IP local do servidor vai aqui
+    server_address.sin_addr.s_addr = inet_addr(argv[1]); //o IP local do servidor vai aqui
 
     int status;
     status = connect(serverSocket, (sockaddr *) &server_address, sizeof(server_address));
