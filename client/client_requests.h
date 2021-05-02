@@ -41,7 +41,6 @@ void cleanBuffer(){
 bool createProfile(){
     Profile profile;
     long int status;
-    int aux;
 
     printf("\n\n------------------------------------------");
     printf("\n        1. Criar perfil\n");
@@ -199,7 +198,6 @@ bool readProfile(){
 }
 
 bool listAllProfiles(){
-    char *email;
     printf("\n\n------------------------------------------");
     printf("\n    b. Listar todos os perfis existentes\n");
     printf("------------------------------------------\n\n");

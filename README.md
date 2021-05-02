@@ -14,8 +14,14 @@ Desenvolvido por Fe e Silvs
 - SQLite3
 
 ## Compilação
-Para compilar o programa, utilize
-```gcc -o cliente cliente.c cJSON.c  -lsqlite3```
+* Para compilar o cliente, utilize o seguinte comando na raiz do projeto:
+```gcc -std=c99 -pedantic -Wall -o ./bin/cliente ./client/cliente.c ./lib/cJSON.c```
+
+* Para compilar o servidor, utilize o seguinte comando na raiz do projeto:
+```gcc -std=c99 -pedantic -Wall -o ./bin/servidor ./server/servidor.c -lsqlite3```
+
+# Execução
+Em um terminal na raiz do projeto, rode primeiramente ```./bin/servidor``` para executar o programa do servidor. Da mesma forma, rode em um outro terminal ```./bin/cliente``` para executar a aplicação do cliente.
 
 ## Utilizando SQLite3 com C:
 
@@ -23,7 +29,7 @@ Para compilar programas contendo a biblioteca __sqlite3.h__, utilize a flag ```-
 
 **Por exemplo:**
 
-```gcc servidor.c -lsqlite3 -o servidor```
+```gcc -std=c99 -pedantic -Wall -o ./bin/servidor ./server/servidor.c -lsqlite3 ```
 
 Se ainda persistirem os erros, executar o seguinte comando:
 

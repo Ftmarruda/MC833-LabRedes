@@ -8,6 +8,9 @@
 # Unignore all dirs
 !*/
 
+# Ignore `bin` dir
+bin/*
+
 # Compiled source #
 ###################
 *.com
