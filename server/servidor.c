@@ -22,7 +22,7 @@ int main(){
     typedef struct sockaddr sockaddr;
     ssize_t     n;
 
-    char serverMessage[256], request[256];
+    char serverMessage[256], request[600];
     int serverSocket, clientSocket;
 
     strcpy(serverMessage, "BEM-VINDO AO SUPERPAPO");
@@ -44,7 +44,7 @@ int main(){
     //bind the socket to IP and port
     bind(serverSocket, (sockaddr *) &server_address, len);
 
-    listen(serverSocket, 1); //can have 1 connection waiting at max
+    listen(serverSocket, 5); //can have 1 connection waiting at max
 
     //accept client connection
     
@@ -55,9 +55,11 @@ int main(){
         close(serverSocket);
 
         again:
-            while ( (n = recv(clientSocket, request, 1000, 0)) > 0){
+            while ( (n = recv(clientSocket, request, 600, 0)) > 0){
                 printf("The client has requested: %s", request);
-                send(clientSocket, request, n, 0);
+                printf("buffer size: %ld\n", n);
+                strcpy(serverMessage, "Usuario Criado\n");
+                send(clientSocket, serverMessage, sizeof(serverMessage), 0);
 
                 if (n < 0 && errno == 4)
                     goto again;

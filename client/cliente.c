@@ -15,8 +15,7 @@
 #include "client_requests.h"
 
 int main(){
-    char string[] = "Connect\n";
-    request = malloc(sizeof(string));
+    char string[] = "Connect\n\0";
     strcpy(request, string);
     strcpy(response, "\0");
 
@@ -28,7 +27,7 @@ int main(){
     //socket address
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(50000);
-    server_address.sin_addr.s_addr = inet_addr("172.30.164.23"); //o IP local do servidor vai aqui
+    server_address.sin_addr.s_addr = INADDR_ANY;//inet_addr("172.30.161.224"); //o IP local do servidor vai aqui
 
     int status;
     status = connect(serverSocket, (sockaddr *) &server_address, sizeof(server_address));

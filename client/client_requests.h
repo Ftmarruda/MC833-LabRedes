@@ -14,10 +14,12 @@
 typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr sockaddr;
 
+#define MAX_LINE 600
+
 //Global variables
 int serverSocket;
 struct sockaddr_in server_address;
-char *request, response[256];
+char request[MAX_LINE], response[MAX_LINE];
 
 
 bool createProfile();
@@ -30,14 +32,17 @@ bool listProfilesBasedOnGraduationYear();
 bool listAllProfiles();
 bool readProfile();
 bool removeProfile();
-void formatJson(char* json);
+int formatJson(char* json, int len);
 void cleanBuffer();
+bool sendToServer(char* json);
 
-void formatJson(char* json){
-    int n = sizeof(json);
-    json = realloc(json, n+1);
+int formatJson(char* json, int len){
+    int n = len;
     json[n] = '\n';
-    return;
+    n++;
+    json[n] = '\0';
+    n++;
+    return n;
 }
 
 void cleanBuffer(){
@@ -45,9 +50,35 @@ void cleanBuffer(){
     while((n = getchar()) != EOF && n != '\n' );
 }
 
+bool sendToServer(char* json){
+    int n = 0, status;
+    while(json[n]!='\0'){
+        n++;
+    }    
+    strcpy(request, json);
+    n = formatJson(request, n);
+    status = send(serverSocket, request, n, 0);
+
+
+    if(status < 0){
+        printf("Send failed, error code %d\n", status);
+        return false;
+    }
+            
+    //receive message from server;
+    status = recv(serverSocket, response, sizeof(response), 0);
+    if(status < 0){
+        printf("Recv failed, error code %d\n", status);
+        return false;
+    }
+
+    printf("The server has responded: %s\n", response);
+    return true;
+}
+
+
 bool createProfile(){
     Profile profile;
-    long int status;
 
     printf("\n\n------------------------------------------");
     printf("\n        1. Criar perfil\n");
@@ -76,32 +107,9 @@ bool createProfile(){
     
     //CRIA STRINGS JSON PARA AS REQUESTS AO SERVIDOR
     char* json = (char*) createJson(profile);
-    size_t n = sizeof(json);
-    //formatJson(json);
-    printf("%s\n", json);
-    printf("n: %ld\n", n);
-    request = realloc(request, sizeof(json));
-    status = 0;
-    strcpy(request, "Criar usuário\n");
-    status = send(serverSocket, json, 135, 0);
-    printf("%ld\n", status);
-    printf("%ld\n", sizeof(json));
+    
 
-    if(status < 0){
-        printf("Send failed, error code %ld\n", status);
-        return false;
-    }
-            
-    //receive message from server;
-    status = recv(serverSocket, response, sizeof(response), 0);
-    if(status < 0){
-        printf("Recv failed, error code %ld\n", status);
-        return false;
-    }
-
-    printf("The server has responded: %s\n", response);
-
-    return true;
+    return sendToServer(json);
 }
 
 bool addExperience(){
@@ -117,7 +125,7 @@ bool addExperience(){
     printf("-> Insira o email do perfil: ");
     scanf("%s", profile.email);
     
-    printf("-> Quantas experiências você gostaria de adicionarà %s?\nR: ", profile.email);
+    printf("-> Quantas experiências você gostaria de adicionar à %s?\nR: ", profile.email);
     scanf("%d", &num_experiences);
     experience = calloc(num_experiences, sizeof(char*));
 
@@ -141,9 +149,7 @@ bool addExperience(){
 
     //Tratamento dos dados e comunicação com o servidor
     char* json = addExperienceJson(profile, num_experiences);
-    printf("%s\n", json);
-
-    return true;
+    return sendToServer(json);
 }
 
 bool addSkill(){
@@ -185,7 +191,7 @@ bool addSkill(){
     char* json = addSkillJson(profile, num_skills);
     printf("%s\n", json);
 
-    return true;
+    return sendToServer(json);;
 }
 
 bool readProfile(){
@@ -204,7 +210,7 @@ bool readProfile(){
     char* json = listJson('u', email);
     printf("%s\n", json);
 
-    return true;
+    return sendToServer(json);;
 }
 
 bool listAllProfiles(){
@@ -219,7 +225,7 @@ bool listAllProfiles(){
     char* json = listJson('a', "ALL");
     printf("%s\n", json);
 
-    return true;
+    return sendToServer(json);;
 }
 
 bool listProfilesBasedOnSkill(){
@@ -239,7 +245,7 @@ bool listProfilesBasedOnSkill(){
     char* json = listJson('s', skill);
     printf("%s\n", json);
 
-    return true;
+    return sendToServer(json);;
 }
 
 bool listProfilesBasedOnEducation(){
@@ -259,7 +265,7 @@ bool listProfilesBasedOnEducation(){
     char* json = listJson('e', education);
     printf("%s\n", json);
 
-    return true;
+    return sendToServer(json);;
 }
 
 bool listProfilesBasedOnGraduationYear(){
@@ -279,7 +285,7 @@ bool listProfilesBasedOnGraduationYear(){
     char* json = listJson('y', graduationYear);
     printf("%s\n", json);
 
-    return true;
+    return sendToServer(json);;
 }
 
 bool list(){
@@ -363,5 +369,5 @@ bool removeProfile(){
     char* json = removeJson(profile);
     printf("%s\n", json);
 
-    return true;
+    return sendToServer(json);;
 }
