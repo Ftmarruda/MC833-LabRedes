@@ -1,8 +1,8 @@
 //CRIA STRINGS JSON PARA AS REQUESTS AO SERVIDOR
 
 #include <stdio.h>
-#include "cJSON.h"
-#include "profileTypes.h"
+#include "../lib/cJSON.h"
+#include "../lib/profileTypes.h"
 
 typedef struct JSONprofile {
     cJSON *email;

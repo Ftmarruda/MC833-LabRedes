@@ -1,4 +1,4 @@
-#ifndef test
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -10,12 +10,10 @@
 #include <netinet/in.h>
 
 #include "JSONfier.h"
-#endif
+
 
 typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr sockaddr;
-
-#define MAX_CARAC 100
 
 //Global variables
 int serverSocket;

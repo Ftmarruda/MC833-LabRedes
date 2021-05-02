@@ -4,6 +4,11 @@ Disponível em: https://classroom.google.com/c/MjYzMTE3MTA2NDky/a/MzA3MDY2NDkwND
 
 Desenvolvido por Fe e Silvs
 
+## Estrutura
+* Dentro da pasta lib temos bibliotecas utilizadas tanto pelo cliente quanto pelo servidor.
+* Dentro da pasta client temos todo o desenvolvimento da aplicação do lado do cliente.
+* Dentro da pasta server temos todo o desenvolvimento do servidor e seu banco de dados.
+
 ## Requisitos
 
 - SQLite3

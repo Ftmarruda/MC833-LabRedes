@@ -13,7 +13,7 @@
 #include <sqlite3.h>
 #include "dao.h"
 
-#include "profileTypes.h"
+#include "../lib/profileTypes.h"
 
 int main(){
 
