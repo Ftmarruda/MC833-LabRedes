@@ -16,14 +16,16 @@
 
 #include "../lib/profileTypes.h"
 
+#define MAX_SIZE 256
+
 int main(){
 
     typedef struct sockaddr_in sockaddr_in;
     typedef struct sockaddr sockaddr;
     ssize_t n;
 
-    char serverMessage[256], request[256];
-    int serverSocket, clientSocket = 0;
+    char serverMessage[MAX_SIZE], request[MAX_SIZE];
+    int serverSocket, clientSocket;
 
     strcpy(serverMessage, "BEM-VINDO AO SUPERPAPO");
     //create the server socket
@@ -44,7 +46,7 @@ int main(){
     //bind the socket to IP and port
     bind(serverSocket, (sockaddr *) &server_address, len);
 
-    listen(serverSocket, 1); //can have 1 connection waiting at max
+    listen(serverSocket, 5); //can have 1 connection waiting at max
 
     //accept client connection
     
@@ -55,9 +57,11 @@ int main(){
         close(serverSocket);
 
         again:
-            while ( (n = recv(clientSocket, request, 1000, 0)) > 0){
+            while ( (n = recv(clientSocket, request, 600, 0)) > 0){
                 printf("The client has requested: %s", request);
-                send(clientSocket, request, n, 0);
+                printf("buffer size: %ld\n", n);
+                strcpy(serverMessage, "Usuario Criado\n");
+                send(clientSocket, serverMessage, sizeof(serverMessage), 0);
 
                 if (n < 0 && errno == 4)
                     goto again;
@@ -67,44 +71,6 @@ int main(){
         //receive message from client
         close(clientSocket);	
     }
-
-
-    //receive message from client
-    //recv(serverSocket, &request, sizeof(request), 0);
-
-    //send message
-    //send(clientSocket, &request, sizeof(request), 0);
-
-    //close socket
-    
-
-    //createProfile("felipe@example.com", "Felipe", "Tiago", "Disneyland, Orlando", "Counter Strike University", "2022");
-    //createProfile("gabriel@example.com", "Gabriel", "Silveira", "Unicamp, Barão Geraldo", "Counter Strike University", "2022");
-
-    //addExperience("banana@example.com", "Trabalhei por dois anos na Conpec Corporation");
-    //addExperience("felipe@example.com", "Faço cerveja");
-    //addExperience("gabriel@example.com", "Sou coach");
-
-    //addSkill("felipe@example.com", "HTML");
-    //addSkill("felipe@example.com", "CSS");
-
-    //addSkill("gabriel@example.com", "HTML");
-    //addSkill("gabriel@example.com", "SQL");
-    //addSkill("gabriel@example.com", "JavaScript");
-
-    //addSkill("banana@example.com", "JavaScript");
-
-    //removeProfile("gabriel@example.com");
-
-    //listAllProfiles();
-    //readProfile("felipe@example.com");
-    //listProfilesBasedOnGraduationYear("2022");
-    //listProfilesBasedOnSkill("Botar o pé atrás da cabeça");
-    //listProfilesBasedOnEducation("Counter Strike University");
     
     return 0;
 }
-
-//------------------------------
-//------||   FUNÇÕES    ||------
-//------------------------------
