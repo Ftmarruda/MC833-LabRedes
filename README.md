@@ -8,8 +8,10 @@
 - [ ] Mandar erro se tiver que criar usuário que já existe
 - [ ] Mudar retorno da função parse() em jsonParser.h? já mandar as msgs do servidor pro usuário prontas?
 - [ ] Ajustar retorno das funções que fazem o sql para as funções que realizam o parse.
-- [ ] Ajustar funções que adicionam skill e experiencia à usuários
-- [ ] Definir um json de resposta: {"response": "Success"/"Failed", "object": {retorno}}
+- [X] Ajustar funções que adicionam skill e experiencia à usuários
+- [ ] Definir um json de resposta: {"response": "Success"/"Failed", "object": {retorno}}, precisa do retorno com as listas.
+- [ ] Ajustar as listagens para ter os joins necessários e mostrar tudo do usuário?
+
 
 
 # MC833-LabRedes

@@ -241,34 +241,44 @@ bool parseCreate(const cJSON *JSONobject){
 * !!!!!!!!!!!!!!AJUSTAR addSkill e addExperience!!!!!!!!!!!!!!!!!!!
 */
 bool parseAddSkill(const cJSON *JSONobject){
+
     char email[31];
-    char skills[600];
-
-    strcpy(email, cJSON_GetObjectItemCaseSensitive(JSONobject, "email")->valuestring);
-    printf("-> Email: %s\n", email);
-
-    strcpy(skills, cJSON_GetObjectItemCaseSensitive(JSONobject, "skills")->valuestring);
-    printf("-> Skills: %s\n", skills);
-
-    return addSkill(email, skills);
-}
-
-bool parseaddExperience(const cJSON *JSONobject){
-    char email[31];
-    cJSON* experiences = cJSON_GetObjectItemCaseSensitive(JSONobject, "experiences");
-    char* exp;
-    int size = cJSON_GetArraySize(experiences), aux;
+    cJSON* SkillsJson = cJSON_GetObjectItemCaseSensitive(JSONobject, "skills");
+    char* skill;
+    int size = cJSON_GetArraySize(SkillsJson), aux;
     bool status = true;
-    printf("Array: %s", (char*) experiences);
-    printf("Size of array: %d\n", size);
 
     strcpy(email, cJSON_GetObjectItemCaseSensitive(JSONobject, "email")->valuestring);
     printf("-> Email: %s\n", email);
 
     for(aux = 0; aux < size; aux++){
-        exp = (char*) cJSON_GetArrayItem(experiences, aux);
+        skill = cJSON_GetArrayItem(SkillsJson, aux)->valuestring;
+        printf("-> Experience %d: %s\n", aux, skill);
+        if(!addSkill(email, skill)){
+            status = false;
+        }
+    }
+
+    return status;
+}
+
+bool parseaddExperience(const cJSON *JSONobject){
+
+    char email[31];
+    cJSON* ExpJson = cJSON_GetObjectItemCaseSensitive(JSONobject, "experiences");
+    char* exp;
+    int size = cJSON_GetArraySize(ExpJson), aux;
+    bool status = true;
+
+    strcpy(email, cJSON_GetObjectItemCaseSensitive(JSONobject, "email")->valuestring);
+    printf("-> Email: %s\n", email);
+
+    for(aux = 0; aux < size; aux++){
+        exp = cJSON_GetArrayItem(ExpJson, aux)->valuestring;
         printf("-> Experience %d: %s\n", aux, exp);
-        status = addExperience(email, exp);
+        if(!addExperience(email, exp)){
+            status = false;
+        }
     }
 
     return status;

@@ -82,7 +82,7 @@ bool addExperience(char email[30], char experience[100]){
     sqlite3 *db;
     char *err_msg = 0;
     
-    int rc = sqlite3_open("app.db", &db);
+    int rc = sqlite3_open(server_path, &db);
     
     if (rc != SQLITE_OK) {
         
@@ -128,7 +128,7 @@ bool addSkill(char email[30], char skill[100]){
     char *err_msg = 0;
     char *sql;
     
-    int rc = sqlite3_open("app.db", &db);
+    int rc = sqlite3_open(server_path, &db);
     
     if (rc != SQLITE_OK) {
         
@@ -197,7 +197,7 @@ bool listProfilesBasedOnEducation(char education[100]){
     sqlite3 *db;
     char *err_msg = 0;
     
-    int rc = sqlite3_open("app.db", &db);
+    int rc = sqlite3_open(server_path, &db);
     
     if (rc != SQLITE_OK) {
         
@@ -242,7 +242,7 @@ bool listProfilesBasedOnSkill(char skill[300]){
     sqlite3 *db;
     char *err_msg = 0;
     
-    int rc = sqlite3_open("app.db", &db);
+    int rc = sqlite3_open(server_path, &db);
     
     if (rc != SQLITE_OK) {
         
@@ -287,7 +287,7 @@ bool listProfilesBasedOnGraduationYear(char graduationYear[4]){
     sqlite3 *db;
     char *err_msg = 0;
     
-    int rc = sqlite3_open("app.db", &db);
+    int rc = sqlite3_open(server_path, &db);
     
     if (rc != SQLITE_OK) {
         
@@ -333,7 +333,7 @@ bool listAllProfiles(){
     sqlite3 *db;
     char *err_msg = 0;
     
-    int rc = sqlite3_open("app.db", &db);
+    int rc = sqlite3_open(server_path, &db);
     
     if (rc != SQLITE_OK) {
         
@@ -376,7 +376,7 @@ bool readProfile(char *email){
     sqlite3 *db;
     char *err_msg = 0;
     
-    int rc = sqlite3_open("app.db", &db);
+    int rc = sqlite3_open(server_path, &db);
     
     if (rc != SQLITE_OK) {
         
@@ -422,7 +422,7 @@ bool removeProfile(char *email){
     sqlite3 *db;
     char *err_msg = 0;
     
-    int rc = sqlite3_open("app.db", &db);
+    int rc = sqlite3_open(server_path, &db);
     
     if (rc != SQLITE_OK) {
         
