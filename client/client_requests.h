@@ -255,7 +255,7 @@ bool listProfilesBasedOnEducation(){
     printf("\n    d. Listar baseado em curso\n");
     printf("------------------------------------------\n\n");
 
-    printf("-> Insira o curso que procura(4 números): ");
+    printf("-> Insira o curso que procura:");
     scanf("%s", education);
 
     printf("\n\nEnviando informações ao servidor\n");
@@ -275,7 +275,7 @@ bool listProfilesBasedOnGraduationYear(){
     printf("\n e. Listar baseado em ano de conclusão\n");
     printf("------------------------------------------\n\n");
 
-    printf("-> Insira o ano de conclusão que procura: ");
+    printf("-> Insira o ano de conclusão que procura(4 números): ");
     scanf("%s", graduationYear);
 
     printf("\n\nEnviando informações ao servidor\n");

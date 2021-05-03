@@ -4,6 +4,12 @@
 - [X] Passar o caminho do banco como parametro
 - [ ] Documentar as mensagens JSON e seus formatos
 - [ ] Falar como se desconectar corretamente do servidor -> configurar fechamento seguro com control+c
+- [ ] Fork do servidor
+- [ ] Mandar erro se tiver que criar usuário que já existe
+- [ ] Mudar retorno da função parse() em jsonParser.h? já mandar as msgs do servidor pro usuário prontas?
+- [ ] Ajustar retorno das funções que fazem o sql para as funções que realizam o parse.
+- [ ] Ajustar funções que adicionam skill e experiencia à usuários
+- [ ] Definir um json de resposta: {"response": "Success"/"Failed", "object": {retorno}}
 
 
 # MC833-LabRedes
