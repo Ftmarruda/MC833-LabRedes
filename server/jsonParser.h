@@ -37,7 +37,7 @@ bool parse(char* JSONstring, int clientSocket){
         if (JSON == NULL){
             const char *error_ptr = cJSON_GetErrorPtr();
             if (error_ptr != NULL){
-                fprintf(stderr, "Error before: %s\n", error_ptr);
+                fprintf(stderr, "[SERVER] Error before: %s\n", error_ptr);
             }
             status = false;
             goto end;

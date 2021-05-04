@@ -74,13 +74,7 @@ int main(int argc, char *argv[ ]){
                         printf("The client has requested: %s", request);
                         printf("buffer size: %ld\n", n);
 
-                        if(!parse(request)){
-                            strcpy(serverMessage, "The request failed!\n");
-                        }else{
-                            strcpy(serverMessage, "Request processed succesfully!\n");
-                        }
-                        
-                        send(clientSocket, serverMessage, sizeof(serverMessage), 0);
+                        parse(request, clientSocket);
 
                         if (n < 0 && errno == 4)
                             goto again;

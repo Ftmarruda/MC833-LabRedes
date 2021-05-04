@@ -428,7 +428,7 @@ bool parseServerMessage(char* response, int len){
     if (JSON == NULL){
         const char *error_ptr = cJSON_GetErrorPtr();
         if (error_ptr != NULL){
-            fprintf(stderr, "Error before: %s\n", error_ptr);
+            fprintf(stderr, "[CLIENT] Error before: %s\n", error_ptr);
         }
         status = false;
         goto end;
