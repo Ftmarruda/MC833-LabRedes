@@ -225,8 +225,8 @@ bool addSkill(char email[30], char skill[100]){
         
         sqlite3_free(err_msg);        
         sqlite3_close(db);
-        return false;
         free(sql);
+        return false;
     }
     free(sql);
 
