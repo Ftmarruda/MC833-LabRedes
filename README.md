@@ -42,8 +42,8 @@ Desenvolvido por Fe e Silvs
 >```gcc -std=c99 -pedantic -Wall -o ./bin/servidor ./server/servidor.c ./lib/cJSON.c -lsqlite3```
 
 # Execução
-Primeiramente você deve ligar o servidor, pegando seu ip. Para isso, em um terminal para o servidor rode ```hostname -I```, isso deve retornar um ip. Após isso, rode o executável do servidor por ```./bin/servidor server/app.db```, onde "server/app.db" é o caminho relativo do terminal ao banco de dados do servidor.
-Com o servidor ligado e tendo seu ip em mãos, podemos rodar a aplicação do cliente por ```./bin/cliente ip```, onde ip é a exatamente o ip retornado por ```hostname -I``
+Primeiramente você deve ligar o servidor, pegando seu ip. Para isso, em um terminal para o servidor rode ```hostname -I```, isso deve retornar um ip. Após isso, na pasta raíz, rode o executável do servidor por ```./bin/servidor server/app.db```, onde "server/app.db" é o caminho relativo do terminal ao banco de dados do servidor.
+Com o servidor ligado e tendo seu ip em mãos, podemos rodar a aplicação do cliente por ```./bin/cliente ip```, onde ip é a exatamente o ip retornado por ```hostname -I``, ou observe seu IP local nas configurações de rede, caso esteja utilizando MacOS.
 
 ## Utilizando SQLite3 com C:
 

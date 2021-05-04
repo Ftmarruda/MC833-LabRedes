@@ -16,7 +16,7 @@
 
 #include "jsonParser.h"
 
-#define MAX_SIZE 256
+#define MAX_SIZE 1024
 
 void emergencyExit();
 
@@ -35,7 +35,7 @@ int main(int argc, char *argv[ ]){
     typedef struct sockaddr sockaddr;
     ssize_t n;
 
-    int serverSocket = 0, clientSocket = 0;
+    int serverSocket = 0, clientSocket = -1;
     char serverMessage[MAX_SIZE], request[MAX_SIZE];
 
     strcpy(serverMessage, "BEM-VINDO AO SUPERPAPO");
@@ -53,38 +53,45 @@ int main(int argc, char *argv[ ]){
     //define client adrr
     sockaddr client_address;
 
-
     //bind the socket to IP and port
     bind(serverSocket, (sockaddr *) &server_address, len);
 
-    listen(serverSocket, 5); //can have 1 connection waiting at max
-
-    //accept client connection
-    
-    while(clientSocket != -1){
+    while(1){
+        listen(serverSocket, 5); //can have 5 connection waiting at max
 
         clientSocket = accept(serverSocket, (sockaddr *) &client_address, &len); //-> substituir valores de null por outras estruturas se quiser pegar o endereço do cliente
-
-        again:
-            while ( (n = recv(clientSocket, request, 600, 0)) > 0){
-                printf("The client has requested: %s", request);
-
-                if(!parse(request, clientSocket)){
-                    printf("The request failed!\n");
-                }else{
-                    printf("Request processed succesfully!\n");
+        
+        if(clientSocket != -1){
+            if(fork() == 0){ //CHILD
+                printf("client socket: %d\n", clientSocket);
+                if(clientSocket == -1){
+                    printf("The client has disconnected\n");
                 }
+                close(serverSocket);
                 
-                //send(clientSocket, serverMessage, sizeof(serverMessage), 0);
+                again:
+                    while ( (n = recv(clientSocket, request, MAX_SIZE, 0)) > 0){
+                        printf("The client has requested: %s", request);
+                        printf("buffer size: %ld\n", n);
 
-                if (n < 0 && errno == 4)
-                    goto again;
-                else if (n < 0)
-                    printf("str_echo: recv error");
+                        if(!parse(request)){
+                            strcpy(serverMessage, "The request failed!\n");
+                        }else{
+                            strcpy(serverMessage, "Request processed succesfully!\n");
+                        }
+                        
+                        send(clientSocket, serverMessage, sizeof(serverMessage), 0);
+
+                        if (n < 0 && errno == 4)
+                            goto again;
+                        else if (n < 0)
+                            printf("str_echo: recv error");
+                    }
+            }else{ //PARENT
+                close(clientSocket);	
             }
-        //receive message from client
-        close(clientSocket);	
+        } 
     }
-    
+  
     return 0;
 }
