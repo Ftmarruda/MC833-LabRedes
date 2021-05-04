@@ -8,18 +8,18 @@
 
 //Transforma as strings JSON em structs profile à serem passados para o banco de dados.
 
-bool parse(char* JSONstring);
-bool parseCreate(const cJSON *JSONobject);
-bool parseAddSkill(const cJSON *JSONobject);
-bool parseaddExperience(const cJSON *JSONobject);
-bool parseRemove(const cJSON *JSONobject);
-bool parseListAll();
-bool parseListUser(const cJSON *JSONobject);
-bool parseListEducation(const cJSON *JSONobject);
-bool parseListSkill(const cJSON *JSONobject);
-bool parseListYear(const cJSON *JSONobject);
+bool parse(char* JSONstring, int clientSocket);
+bool parseCreate(const cJSON *JSONobject, int clientSocket);
+bool parseAddSkill(const cJSON *JSONobject, int clientSocket);
+bool parseaddExperience(const cJSON *JSONobject, int clientSocket);
+bool parseRemove(const cJSON *JSONobject, int clientSocket);
+bool parseListAll(int clientSocket);
+bool parseListUser(const cJSON *JSONobject, int clientSocket);
+bool parseListEducation(const cJSON *JSONobject, int clientSocket);
+bool parseListSkill(const cJSON *JSONobject, int clientSocket);
+bool parseListYear(const cJSON *JSONobject, int clientSocket);
 
-bool parse(char* JSONstring){
+bool parse(char* JSONstring, int clientSocket){
 
     const cJSON *operation = NULL;
     const cJSON *JSONobject = NULL;
@@ -29,6 +29,8 @@ bool parse(char* JSONstring){
     //Criando um objeto JSON a partir da string recebida
     if(strcmp(JSONstring, "Connect\n")==0){
         printf("Cliente Conectado\n");
+        char* response = formatResponse(true, NULL, 0, 0);
+        sendResponse(response, clientSocket);
         status = true;
         goto end;
     }else{
@@ -53,7 +55,7 @@ bool parse(char* JSONstring){
             //obtendo o perfil a ser criado
             JSONobject = cJSON_GetObjectItemCaseSensitive(JSON, "object");
 
-            if(!parseCreate(JSONobject)){
+            if(!parseCreate(JSONobject, clientSocket)){
                 printf("The server couldn't create the profile\n");
                 status = false;
                 goto end;
@@ -68,7 +70,7 @@ bool parse(char* JSONstring){
             //obtendo o perfil a ser criado
             JSONobject = cJSON_GetObjectItemCaseSensitive(JSON, "object");
 
-            if(!parseAddSkill(JSONobject)){
+            if(!parseAddSkill(JSONobject, clientSocket)){
                 printf("The server couldn't add the skills\n");
                 status = false;
                 goto end;
@@ -83,7 +85,7 @@ bool parse(char* JSONstring){
             //obtendo o perfil a ser criado
             JSONobject = cJSON_GetObjectItemCaseSensitive(JSON, "object");
 
-            if(!parseaddExperience(JSONobject)){
+            if(!parseaddExperience(JSONobject, clientSocket)){
                 printf("The server couldn't add the experiences\n");
                 status = false;
                 goto end;
@@ -98,7 +100,7 @@ bool parse(char* JSONstring){
             //obtendo o perfil a ser criado
             JSONobject = cJSON_GetObjectItemCaseSensitive(JSON, "object");
 
-            if(!parseRemove(JSONobject)){
+            if(!parseRemove(JSONobject, clientSocket)){
                 printf("The server couldn't remove the user\n");
                 status = false;
                 goto end;
@@ -110,7 +112,7 @@ bool parse(char* JSONstring){
 
         }else if(strcmp(operation->valuestring, "ListAll")==0){
 
-            if(!parseListAll()){
+            if(!parseListAll(clientSocket)){
                 printf("The server couldn't list the users\n");
                 status = false;
                 goto end;
@@ -125,7 +127,7 @@ bool parse(char* JSONstring){
             //obtendo o perfil a ser criado
             JSONobject = cJSON_GetObjectItemCaseSensitive(JSON, "object");
 
-            if(!parseListUser(JSONobject)){
+            if(!parseListUser(JSONobject, clientSocket)){
                 printf("The server couldn't list the users\n");
                 status = false;
                 goto end;
@@ -140,7 +142,7 @@ bool parse(char* JSONstring){
             //obtendo o perfil a ser criado
             JSONobject = cJSON_GetObjectItemCaseSensitive(JSON, "object");
 
-            if(!parseListEducation(JSONobject)){
+            if(!parseListEducation(JSONobject, clientSocket)){
                 printf("The server couldn't list the users\n");
                 status = false;
                 goto end;
@@ -155,7 +157,7 @@ bool parse(char* JSONstring){
             //obtendo o perfil a ser criado
             JSONobject = cJSON_GetObjectItemCaseSensitive(JSON, "object");
 
-            if(!parseListSkill(JSONobject)){
+            if(!parseListSkill(JSONobject, clientSocket)){
                 printf("The server couldn't list the users\n");
                 status = false;
                 goto end;
@@ -170,7 +172,7 @@ bool parse(char* JSONstring){
             //obtendo o perfil a ser criado
             JSONobject = cJSON_GetObjectItemCaseSensitive(JSON, "object");
 
-            if(!parseListYear(JSONobject)){
+            if(!parseListYear(JSONobject, clientSocket)){
                 printf("The server couldn't list the users\n");
                 status = false;
                 goto end;
@@ -183,6 +185,8 @@ bool parse(char* JSONstring){
         }else{
 
             printf("The server couldn't parse the operation\n");
+            char* response = formatResponse(false, NULL, 0, 0);
+            sendResponse(response, clientSocket);
             status = false;
             goto end;
 
@@ -199,14 +203,14 @@ bool parse(char* JSONstring){
 ----------------------------
 */
 
-bool parseCreate(const cJSON *JSONobject){
+bool parseCreate(const cJSON *JSONobject, int clientSocket){
 
     //CRIA O STRUCT PROFILE COM OS DADOS DO PERFIL
     Profile profile;
     bool status = false;
 
     printf("PARSING...\n");
-
+    printf("%s\n", cJSON_GetObjectItemCaseSensitive(JSONobject, "email")->valuestring);
     strcpy(profile.email, cJSON_GetObjectItemCaseSensitive(JSONobject, "email")->valuestring);
     printf("-> Email: %s\n", profile.email);
 
@@ -226,7 +230,7 @@ bool parseCreate(const cJSON *JSONobject){
     printf("-> Graduation Year: %s\n", profile.graduationYear);
 
     //CRIA O PERFIL NO BANCO DE DADOS
-    if(createProfile(profile)){
+    if(createProfile(profile, clientSocket)){
         printf("Data inserted in the database\n");
         status = true;
     }else{
@@ -240,7 +244,7 @@ bool parseCreate(const cJSON *JSONobject){
 /*
 * !!!!!!!!!!!!!!AJUSTAR addSkill e addExperience!!!!!!!!!!!!!!!!!!!
 */
-bool parseAddSkill(const cJSON *JSONobject){
+bool parseAddSkill(const cJSON *JSONobject, int clientSocket){
 
     char email[31];
     cJSON* SkillsJson = cJSON_GetObjectItemCaseSensitive(JSONobject, "skills");
@@ -258,11 +262,16 @@ bool parseAddSkill(const cJSON *JSONobject){
             status = false;
         }
     }
-
-    return status;
+    char* response;
+    if(status == true){
+        response = formatResponse(true, NULL, 0, 0);
+    }else{
+        response = formatResponse(false, NULL, 0, 0);
+    }
+    return sendResponse(response, clientSocket);
 }
 
-bool parseaddExperience(const cJSON *JSONobject){
+bool parseaddExperience(const cJSON *JSONobject, int clientSocket){
 
     char email[31];
     cJSON* ExpJson = cJSON_GetObjectItemCaseSensitive(JSONobject, "experiences");
@@ -281,58 +290,64 @@ bool parseaddExperience(const cJSON *JSONobject){
         }
     }
 
-    return status;
+    char* response;
+    if(status == true){
+        response = formatResponse(true, NULL, 0, 0);
+    }else{
+        response = formatResponse(false, NULL, 0, 0);
+    }
+    return sendResponse(response, clientSocket);
 }
 
-bool parseRemove(const cJSON *JSONobject){
+bool parseRemove(const cJSON *JSONobject, int clientSocket){
     char email[31];
 
     strcpy(email, cJSON_GetObjectItemCaseSensitive(JSONobject, "email")->valuestring);
     printf("-> Email: %s\n", email);
 
-    return removeProfile(email);
+    return removeProfile(email, clientSocket);
 }
 
-bool parseListAll(){
-    return listAllProfiles();
+bool parseListAll(int clientSocket){
+    return listAllProfiles(clientSocket);
 }
 
-bool parseListUser(const cJSON *JSONobject){
+bool parseListUser(const cJSON *JSONobject, int clientSocket){
 
     char email[31];
 
     strcpy(email, cJSON_GetObjectItemCaseSensitive(JSONobject, "email")->valuestring);
     printf("-> Email: %s\n", email);
 
-    return readProfile(email);
+    return readProfile(email, clientSocket);
 }
 
-bool parseListEducation(const cJSON *JSONobject){
+bool parseListEducation(const cJSON *JSONobject, int clientSocket){
 
     char education[101];
 
     strcpy(education, cJSON_GetObjectItemCaseSensitive(JSONobject, "education")->valuestring);
     printf("-> Education: %s\n", education);
 
-    return listProfilesBasedOnEducation(education);
+    return listProfilesBasedOnEducation(education, clientSocket);
 }
 
-bool parseListSkill(const cJSON *JSONobject){
+bool parseListSkill(const cJSON *JSONobject, int clientSocket){
 
     char skill[101];
 
     strcpy(skill, cJSON_GetObjectItemCaseSensitive(JSONobject, "skill")->valuestring);
     printf("-> Skill: %s\n", skill);
 
-    return listProfilesBasedOnSkill(skill);
+    return listProfilesBasedOnSkill(skill, clientSocket);
 }
 
-bool parseListYear(const cJSON *JSONobject){
+bool parseListYear(const cJSON *JSONobject, int clientSocket){
 
     char graduationYear[5];
 
     strcpy(graduationYear, cJSON_GetObjectItemCaseSensitive(JSONobject, "graduationYear")->valuestring);
     printf("-> Graduation Year: %s\n", graduationYear);
 
-    return listProfilesBasedOnGraduationYear(graduationYear);
+    return listProfilesBasedOnGraduationYear(graduationYear, clientSocket);
 }

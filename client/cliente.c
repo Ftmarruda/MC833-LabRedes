@@ -24,9 +24,8 @@ int main(int argc, char *argv[ ]){
     //O que acontece quando eu aperto ^C
     signal(SIGINT, emergencyExit);
 
-    char string[] = "Connect\n\0";
-    strcpy(request, string);
-    strcpy(response, "\0");
+    char request[] = "Connect\n\0";
+    char response[50];
 
     printf("Conectando ao servidor.....\n");
     printf("Aguarde.....\n");
@@ -48,8 +47,8 @@ int main(int argc, char *argv[ ]){
 
     status = send(serverSocket, request, sizeof(request), 0);
     status = recv(serverSocket, response, sizeof(response), 0);
-    printf("%s \nServidor Conectado!\n", response);
-
+    printf("\nServidor Conectado!\n");
+    
     char op = '0';
     bool flag = true;
     bool validation;
@@ -69,7 +68,14 @@ int main(int argc, char *argv[ ]){
                 "   6. Desconectar do servidor\n"
                 "Digite o número da opção que deseja realizar: "
         );
+
+        input:
         scanf("%c", &op);
+        if(op=='\n'){
+            goto input;
+        }
+        getchar();
+        
         switch (op)
         {
         case '1'://criar novo usuário
@@ -85,7 +91,6 @@ int main(int argc, char *argv[ ]){
             break;
 
         case '4'://traz menu para escolha de qual listagem o usuário quer realizar
-            cleanBuffer();
             validation = list();
             break;
 
@@ -116,7 +121,6 @@ int main(int argc, char *argv[ ]){
         }else if(flag && !validation){
             printf("\n--------------Erro!!--------------\n");
         }
-        cleanBuffer();
     }
 
     return 0;

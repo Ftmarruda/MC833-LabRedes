@@ -27,6 +27,7 @@ char* addSkillJson(Profile profile, int len);
 char* addExperienceJson(Profile profile, int len);
 char* removeJson(Profile profile);
 char* listJson(char operation, char* string);
+bool parseServerMessage(char* response, int len);
 
 /*
 ----------------------------
@@ -166,7 +167,7 @@ char* addSkillJson(Profile profile, int len){
 
     //Array of skills
     JSONprofileCreate.skills = cJSON_CreateStringArray(profile.skills, len);
-    if (JSONprofileCreate.email == NULL){
+    if (JSONprofileCreate.skills == NULL){
         goto end;
     }
     cJSON_AddItemToObject(query.object, "skills", JSONprofileCreate.skills);
@@ -232,7 +233,7 @@ char* addExperienceJson(Profile profile, int len){
 
     //Array of experiences
     JSONprofileCreate.experience = cJSON_CreateStringArray(profile.experience, len);
-    if (JSONprofileCreate.email == NULL){
+    if (JSONprofileCreate.experience == NULL){
         goto end;
     }
     cJSON_AddItemToObject(query.object, "experiences", JSONprofileCreate.experience);
@@ -413,4 +414,51 @@ char* listJson(char operation, char* string){
     cJSON_Delete(query.wrapper);
 
     return retorno;
+}
+
+//{"response": "SUCCESS"/"FAILED", "object": {retorno}}
+bool parseServerMessage(char* response, int len){
+
+    const cJSON *operation = NULL;
+    const cJSON *JSONobject = NULL;
+    bool status = true;
+    int i, n;
+    cJSON *JSON = cJSON_Parse(response);
+
+    if (JSON == NULL){
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL){
+            fprintf(stderr, "Error before: %s\n", error_ptr);
+        }
+        status = false;
+        goto end;
+    }
+
+    //obtendo a operação à ser executada
+    operation = cJSON_GetObjectItemCaseSensitive(JSON, "response");
+    /*if (cJSON_IsString(operation) && (operation->valuestring != NULL)){
+        printf("Server response: \"%s\"\n", operation->valuestring);
+    }*/
+
+    JSONobject = cJSON_GetObjectItemCaseSensitive(JSON, "profiles");
+
+    if(strcmp(operation->valuestring, "SUCCESS")==0){
+        printf("\nRequisição processada pelo servidor com sucesso!\n");
+        if ((JSONobject != NULL) && (cJSON_IsArray(JSONobject))){
+            n = cJSON_GetArraySize(JSONobject);
+            printf("Usuários!\n");
+            for(i = 0; i < n; i++){
+                printf("%s\n", cJSON_PrintUnformatted(cJSON_GetArrayItem(JSONobject, i)));
+            }
+        }
+    }else if(strcmp(operation->valuestring, "FAILED")==0){
+        printf("\nFalha no processamento do servidor! Por favor, tente novamente.\n");
+        status = false;
+    }else{
+        printf("Parsing server message failed! Please try again\n");
+        status = false;
+    }
+
+    end:
+        return status;
 }

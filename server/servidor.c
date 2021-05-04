@@ -30,7 +30,6 @@ int main(int argc, char *argv[ ]){
     }
     server_path = malloc((sizeof(argv[1])*sizeof(char))+1);
     strcpy(server_path, argv[1]);
-    printf("%s", server_path);
     
     typedef struct sockaddr_in sockaddr_in;
     typedef struct sockaddr sockaddr;
@@ -88,12 +87,11 @@ int main(int argc, char *argv[ ]){
                         else if (n < 0)
                             printf("str_echo: recv error");
                     }
-            }else{
+            }else{ //PARENT
                 close(clientSocket);	
             }
-        }
-        
+        } 
     }
-    
+  
     return 0;
 }
