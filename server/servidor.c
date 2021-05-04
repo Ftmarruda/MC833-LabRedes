@@ -12,15 +12,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include <sqlite3.h>
-
 #include "jsonParser.h"
 
 #define MAX_SIZE 1024
 
 void emergencyExit();
-
-
 
 int main(int argc, char *argv[ ]){
 
