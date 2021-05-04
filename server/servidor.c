@@ -30,7 +30,6 @@ int main(int argc, char *argv[ ]){
     }
     server_path = malloc((sizeof(argv[1])*sizeof(char))+1);
     strcpy(server_path, argv[1]);
-    printf("%s", server_path);
     
     typedef struct sockaddr_in sockaddr_in;
     typedef struct sockaddr sockaddr;
@@ -65,21 +64,18 @@ int main(int argc, char *argv[ ]){
     while(clientSocket != -1){
 
         clientSocket = accept(serverSocket, (sockaddr *) &client_address, &len); //-> substituir valores de null por outras estruturas se quiser pegar o endereço do cliente
-        printf("client socket: %d\n", clientSocket);
-        close(serverSocket);
 
         again:
             while ( (n = recv(clientSocket, request, 600, 0)) > 0){
                 printf("The client has requested: %s", request);
-                printf("buffer size: %ld\n", n);
 
-                if(!parse(request)){
-                    strcpy(serverMessage, "The request failed!\n");
+                if(!parse(request, clientSocket)){
+                    printf("The request failed!\n");
                 }else{
-                    strcpy(serverMessage, "Request processed succesfully!\n");
+                    printf("Request processed succesfully!\n");
                 }
                 
-                send(clientSocket, serverMessage, sizeof(serverMessage), 0);
+                //send(clientSocket, serverMessage, sizeof(serverMessage), 0);
 
                 if (n < 0 && errno == 4)
                     goto again;

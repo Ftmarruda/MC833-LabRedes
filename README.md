@@ -2,7 +2,7 @@
 
 - [X] Instruções sobre como digitar o IP local do servidor. Pode colocar como argumento pra execuçãp do programa tb.
 - [X] Passar o caminho do banco como parametro
-- [ ] Documentar as mensagens JSON e seus formatos
+- [X] Documentar as mensagens JSON e seus formatos
 - [ ] Falar como se desconectar corretamente do servidor -> configurar fechamento seguro com control+c
 - [ ] Fork do servidor
 - [ ] Mandar erro se tiver que criar usuário que já existe
@@ -11,12 +11,14 @@
 - [X] Ajustar funções que adicionam skill e experiencia à usuários
 - [ ] Definir um json de resposta: {"response": "Success"/"Failed", "object": {retorno}}, precisa do retorno com as listas.
 - [ ] Ajustar as listagens para ter os joins necessários e mostrar tudo do usuário?
+- [ ] Ajustar retornos de json do servidor para o cliente quando der falha
 
 
 
 # MC833-LabRedes
 Laboratório Pratico de redes
 Disponível em: https://classroom.google.com/c/MjYzMTE3MTA2NDky/a/MzA3MDY2NDkwNDkx/details
+Documentado em: https://docs.google.com/document/d/1-KrSTiqHg5B6wJTbwrwL4xNw6y8HJFNvjDU0lH-WqGc/edit?usp=sharing
 
 Desenvolvido por Fe e Silvs
 

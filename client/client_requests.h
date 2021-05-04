@@ -14,12 +14,10 @@
 typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr sockaddr;
 
-#define MAX_LINE 600
-
 //Global variables
 int serverSocket;
 struct sockaddr_in server_address;
-char request[MAX_LINE], response[MAX_LINE];
+char request[MAX_LINE];
 
 
 bool createProfile();
@@ -45,101 +43,100 @@ int formatJson(char* json, int len){
     return n;
 }
 
-void cleanBuffer(){
-    int n;
-    while((n = getchar()) != EOF && n != '\n' );
-}
-
 bool sendToServer(char* json){
     int n = 0, status;
+    char* response = malloc(sizeof(char)*5000);
     while(json[n]!='\0'){
         n++;
     }    
-    strcpy(request, json);
-    n = formatJson(request, n);
-    status = send(serverSocket, request, n, 0);
+    n = formatJson(json, n);
+    status = send(serverSocket, json, n, 0);
 
 
     if(status < 0){
         printf("Send failed, error code %d\n", status);
         return false;
     }
-            
     //receive message from server;
-    status = recv(serverSocket, response, sizeof(response), 0);
-    if(status < 0){
+    status = recv(serverSocket, response, 5000, 0);
+    if(status <= 0){
         printf("Recv failed, error code %d\n", status);
         return false;
     }
 
-    printf("The server has responded: %s\n", response);
-    return true;
+    bool retorno = parseServerMessage(response, status);
+    free(response);
+    //treat server response
+    return retorno;
 }
-
 
 bool createProfile(){
     Profile profile;
+    bool status;
 
     printf("\n\n------------------------------------------");
     printf("\n        1. Criar perfil\n");
     printf("------------------------------------------\n\n");
     
     printf("-> Insira o email do perfil: ");
-    scanf("%s", profile.email);
+    fgets(profile.email, MAX_Name, stdin);
+    profile.email[strcspn(profile.email, "\n")] = '\0';
 
     printf("-> Insira o primeiro nome do perfil: ");
-    scanf("%s", profile.name);
+    fgets(profile.name, MAX_Name, stdin);
+    profile.name[strcspn(profile.name, "\n")] = '\0';
 
     printf("-> Insira o último nome do perfil: ");
-    scanf("%s", profile.surname);
+    fgets(profile.surname, MAX_Name, stdin);
+    profile.surname[strcspn(profile.surname, "\n")] = '\0';
 
     printf("-> Insira o endereço do perfil: ");
-    scanf("%s", profile.address);
+    fgets(profile.address, MAX_CARAC, stdin);
+    profile.address[strcspn(profile.address, "\n")] = '\0';
 
     printf("-> Insira o curso do perfil: ");
-    scanf("%s", profile.education);
+    fgets(profile.education, MAX_CARAC, stdin);
+    profile.education[strcspn(profile.education, "\n")] = '\0';
 
     printf("-> Insira o ano de conclusão de curso do perfil: ");
-    scanf("%s", profile.graduationYear);
+    fgets(profile.graduationYear, MAX_Year, stdin);
+    profile.graduationYear[strcspn(profile.graduationYear, "\n")] = '\0';
 
     printf("\n\nEnviando informações ao servidor\n");
     printf("-----------------Aguarde-----------------\n\n");
     
     //CRIA STRINGS JSON PARA AS REQUESTS AO SERVIDOR
     char* json = (char*) createJson(profile);
-    
+    status = sendToServer(json);
 
-    return sendToServer(json);
+    return status;
 }
 
 bool addExperience(){
     Profile profile;
     char** experience;
-    char aux[MAX_CARAC];
     int num_experiences;
+    bool status;
 
     printf("\n\n------------------------------------------");
     printf("\n    2. Adicionar experiência à perfil\n");
     printf("------------------------------------------\n\n");
 
     printf("-> Insira o email do perfil: ");
-    scanf("%s", profile.email);
+    fgets(profile.email, MAX_Name, stdin);
+    profile.email[strcspn(profile.email, "\n")] = '\0';
     
     printf("-> Quantas experiências você gostaria de adicionar à %s?\nR: ", profile.email);
     scanf("%d", &num_experiences);
+    getchar();
     experience = calloc(num_experiences, sizeof(char*));
 
     int i;
     for(i = 0; i < num_experiences; i++){
         experience[i] = calloc(MAX_CARAC, sizeof(char));
         printf("-> Insira a %d° experiência profissonal do perfil: ", i+1);
-        scanf("%s", aux);
-        if(sizeof(aux) > MAX_CARAC){
-            printf("ERRO!!!! Número de caracteres excede o máximo permitido de %d caracteres. Tente novamente :)\n", MAX_CARAC);
-            i--;
-        }else{
-            strcpy(experience[i], aux);
-        }    
+        fgets(experience[i], MAX_CARAC, stdin);
+        experience[i][strcspn(experience[i], "\n")] = '\0';    
     }
     
     profile.experience = (const char * const*)experience;
@@ -149,38 +146,41 @@ bool addExperience(){
 
     //Tratamento dos dados e comunicação com o servidor
     char* json = addExperienceJson(profile, num_experiences);
-    return sendToServer(json);
+    status = sendToServer(json);
+        //Liberando variável alocada
+    for(i = 0; i < num_experiences; i++){
+        free(experience[i]);
+    }
+    free(experience);
+
+    return status;
 }
 
 bool addSkill(){
     Profile profile;
     char** skill;
-    char aux[MAX_CARAC];
     int num_skills;
+    bool status;
 
     printf("\n\n------------------------------------------");
     printf("\n    3. Adicionar habilidade à perfil\n");
     printf("------------------------------------------\n\n");
 
     printf("-> Insira o email do perfil: ");
-    scanf("%s", profile.email);
+    fgets(profile.email, MAX_Name, stdin);
+    profile.email[strcspn(profile.email, "\n")] = '\0';
 
     printf("-> Quantas habilidades você gostaria de adicionar à %s?\nR: ", profile.email);
     scanf("%d", &num_skills);
+    getchar();
     skill = calloc(num_skills, sizeof(char*));
 
     int i;
     for(i = 0; i < num_skills; i++){
         skill[i] = calloc(MAX_CARAC, sizeof(char));
         printf("-> Insira a %d° habilidade do perfil: ", i+1);
-        scanf("%s", aux);
-        if(sizeof(aux) > MAX_CARAC){
-            printf("ERRO!!!! Número de caracteres excede o máximo permitido de %d caracteres. Tente novamente :)\n", MAX_CARAC);
-            i--;
-        }else{
-            strcpy(skill[i], aux);
-            printf("%s\n", skill[i]);
-        }    
+        fgets(skill[i], MAX_CARAC, stdin);
+        skill[i][strcspn(skill[i], "\n")] = '\0';
     }
     profile.skills = (const char * const*)skill;
 
@@ -189,26 +189,32 @@ bool addSkill(){
 
     //Tratamento dos dados e comunicação com o servidor
     char* json = addSkillJson(profile, num_skills);
-    printf("%s\n", json);
+    status = sendToServer(json);
 
-    return sendToServer(json);;
+    //Liberando variável alocada
+    for(i = 0; i < num_skills; i++){
+        free(skill[i]);
+    }
+    free(skill);
+
+    return status;
 }
 
 bool readProfile(){
-    char email[MAX_CARAC];
+    char email[MAX_Name];
     printf("\n\n------------------------------------------");
     printf("\n    a. Ler perfil a partir de email\n");
     printf("------------------------------------------\n\n");
 
     printf("-> Insira o email do perfil: ");
-    scanf("%s", email);
+    fgets(email, MAX_Name, stdin);
+    email[strcspn(email, "\n")] = '\0';
 
     printf("\n\nEnviando informações ao servidor\n");
     printf("-----------------Aguarde-----------------\n\n");
 
     //Tratamento dos dados e comunicação com o servidor
     char* json = listJson('u', email);
-    printf("%s\n", json);
 
     return sendToServer(json);;
 }
@@ -223,7 +229,6 @@ bool listAllProfiles(){
 
     //Tratamento dos dados e comunicação com o servidor
     char* json = listJson('a', "ALL");
-    printf("%s\n", json);
 
     return sendToServer(json);;
 }
@@ -236,14 +241,14 @@ bool listProfilesBasedOnSkill(){
     printf("------------------------------------------\n\n");
 
     printf("-> Insira a skill que procura: ");
-    scanf("%s", skill);
+    fgets(skill, MAX_CARAC, stdin);
+    skill[strcspn(skill, "\n")] = '\0';
 
     printf("\n\nEnviando informações ao servidor\n");
     printf("-----------------Aguarde-----------------\n\n");
 
     //Tratamento dos dados e comunicação com o servidor
     char* json = listJson('s', skill);
-    printf("%s\n", json);
 
     return sendToServer(json);;
 }
@@ -256,34 +261,34 @@ bool listProfilesBasedOnEducation(){
     printf("------------------------------------------\n\n");
 
     printf("-> Insira o curso que procura:");
-    scanf("%s", education);
+    fgets(education, MAX_CARAC, stdin);
+    education[strcspn(education, "\n")] = '\0';
 
     printf("\n\nEnviando informações ao servidor\n");
     printf("-----------------Aguarde-----------------\n\n");
 
     //Tratamento dos dados e comunicação com o servidor
     char* json = listJson('e', education);
-    printf("%s\n", json);
 
     return sendToServer(json);;
 }
 
 bool listProfilesBasedOnGraduationYear(){
-    char graduationYear[4];
+    char graduationYear[MAX_Year];
 
     printf("\n\n------------------------------------------");
     printf("\n e. Listar baseado em ano de conclusão\n");
     printf("------------------------------------------\n\n");
 
     printf("-> Insira o ano de conclusão que procura(4 números): ");
-    scanf("%s", graduationYear);
+    fgets(graduationYear, MAX_Year, stdin);
+    graduationYear[strcspn(graduationYear, "\n")] = '\0';
 
     printf("\n\nEnviando informações ao servidor\n");
     printf("-----------------Aguarde-----------------\n\n");
 
      //Tratamento dos dados e comunicação com o servidor
     char* json = listJson('y', graduationYear);
-    printf("%s\n", json);
 
     return sendToServer(json);;
 }
@@ -307,6 +312,7 @@ bool list(){
                 "Digite o número da opção que deseja realizar: "
         );
         scanf("%c", &letter);
+        getchar();
         switch (letter)
         {
         case 'a'://ler perfil a partir de email
@@ -343,7 +349,6 @@ bool list(){
             printf("\n\n------------------------------------------\n");
             printf("--------------Opção-Invalida--------------\n");
             printf("------------------------------------------\n\n");
-            cleanBuffer(); //we clean the buffer here
             break;
         }
         
@@ -358,16 +363,14 @@ bool removeProfile(){
     printf("------------------------------------------\n\n");
 
     printf("-> Insira o email do perfil que deseja remover: ");
-    scanf("%s", profile.email);
-
-
+    fgets(profile.email, MAX_Name, stdin);
+    profile.email[strcspn(profile.email, "\n")] = '\0';
 
     printf("\n\nEnviando informações ao servidor\n");
     printf("-----------------Aguarde-----------------\n\n");
 
      //Tratamento dos dados e comunicação com o servidor
     char* json = removeJson(profile);
-    printf("%s\n", json);
 
     return sendToServer(json);;
 }

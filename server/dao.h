@@ -1,20 +1,44 @@
 #include<sqlite3.h>
 #include<stdio.h>
+#include "../lib/cJSON.h"
 
 #define QUERY_MAX_SIZE 512
+#define MAX_COLUMN 10
+#define MAX_ROW 1000
+
+typedef struct JSONprofile {
+    cJSON *email;
+    cJSON *name;
+    cJSON *surname;
+    cJSON *address;
+    cJSON *education;
+    cJSON *graduationYear;
+    cJSON *experience; //vetor de experiencias
+    cJSON *skills; //vetor de skills
+} JSONprofile;
+
+typedef struct JSONquery {
+    cJSON *wrapper;
+    cJSON *operation;
+    cJSON *object;
+} JSONquery;
 
 char* server_path;
 
-bool createProfile (Profile profile);
+bool createProfile (Profile profile, int clientSocket);
 bool addExperience(char email[30], char professionalExperience[100]);
 bool addSkill(char email[30], char skill[100]);
-bool listProfilesBasedOnSkill(char skill[100]);
-bool listProfilesBasedOnEducation(char education[100]);
-bool listProfilesBasedOnGraduationYear(char graduationYear[4]);
-bool listAllProfiles();
-bool readProfile(char *email);
-bool removeProfile(char *email);
+bool listProfilesBasedOnSkill(char skill[100], int clientSocket);
+bool listProfilesBasedOnEducation(char education[100], int clientSocket);
+bool listProfilesBasedOnGraduationYear(char graduationYear[4], int clientSocket);
+bool listAllProfiles(int clientSocket);
+bool readProfile(char *email, int clientSocket);
+bool removeProfile(char *email, int clientSocket);
 int callback(void *, int, char **, char **);
+char* formatResponse(bool status, char** data, int lineCount, int collumnCount);
+cJSON* formatProfiles(char** data, int lineCout, int collumnCount);
+bool sendResponse(char* response, int clientSocket);
+int formatJson(char* json, int len);
 
 /*
 ----------------------------
@@ -22,7 +46,32 @@ int callback(void *, int, char **, char **);
 ----------------------------
 */
 
-bool createProfile (Profile profile){
+int formatJson(char* json, int len){
+    int n = len;
+    json[n] = '\n';
+    n++;
+    json[n] = '\0';
+    n++;
+    return n;
+}
+
+bool sendResponse(char* response, int clientSocket){
+    int n = 0, status;
+    while(response[n]!='\0'){
+        n++;
+    }    
+    n = formatJson(response, n);
+    status = send(clientSocket, response, n, 0);
+
+
+    if(status < 0){
+        printf("Send failed, error code %d\n", status);
+        return false;
+    }
+    return true;
+}
+
+bool createProfile (Profile profile, int clientSocket){
    
     sqlite3 *db;
     char *err_msg = 0;
@@ -53,8 +102,6 @@ bool createProfile (Profile profile){
     strcat(sql, profile.graduationYear);
     strcat(sql, "');");
 
-    printf("Query:\n%s\n", sql);
-
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK ) {
@@ -65,10 +112,11 @@ bool createProfile (Profile profile){
         sqlite3_close(db);
         return false;
     }
-    
+    char* response = formatResponse(true, NULL, 0, 0);
+
     sqlite3_close(db);
 
-    return true;
+    return sendResponse(response, clientSocket);
 }
 
 /*
@@ -110,7 +158,7 @@ bool addExperience(char email[30], char experience[100]){
         sqlite3_close(db);
         return false;
     }
-    
+
     sqlite3_close(db);
 
     return true;
@@ -193,9 +241,12 @@ bool addSkill(char email[30], char skill[100]){
 ---------------------------------------------
 */
 
-bool listProfilesBasedOnEducation(char education[100]){
+bool listProfilesBasedOnEducation(char education[100], int clientSocket){
+    bool status = true;
     sqlite3 *db;
+    char **sql_return;
     char *err_msg = 0;
+    int n, linecount, collumncount, i;
     
     int rc = sqlite3_open(server_path, &db);
     
@@ -212,10 +263,11 @@ bool listProfilesBasedOnEducation(char education[100]){
     strcpy(sql, "SELECT * FROM Profiles WHERE Education == '");
     strcat(sql, education);
     strcat(sql, "';");
+    sqlite3_stmt *stmt;
 
-        
-    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
-    
+    //rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+
+    rc = sqlite3_prepare_v2(db, sql, QUERY_MAX_SIZE, &stmt, (const char**)&err_msg);
     if (rc != SQLITE_OK ) {
         
         fprintf(stderr, "Failed to select data\n");
@@ -224,12 +276,51 @@ bool listProfilesBasedOnEducation(char education[100]){
         sqlite3_free(err_msg);
         sqlite3_close(db);
         
-        return false;
-    } 
+        status = false;
+        goto end;
+    }
+
+    n = sqlite3_column_count(stmt);
+    if(n > MAX_COLUMN){
+        printf("Max collumn count reached\n");
+        status = false;
+        goto end;
+    }
+
+    linecount = 0;
+    sql_return = malloc(sizeof(char*)*MAX_LINE*MAX_COLUMN);
+    do{
+        rc = sqlite3_step(stmt);
+        
+        if (rc == SQLITE_ROW) {
+            for(collumncount = 0; collumncount < n; collumncount++){
+                sql_return[n*linecount+collumncount] = malloc(sizeof(char)*MAX_CARAC);
+                strcpy(sql_return[n*linecount+collumncount], (const char*)sqlite3_column_text(stmt, collumncount));
+            }
+        }
+
+        linecount++;
+        if(linecount == MAX_ROW){
+            printf("Max line count reached\n");
+            break;
+        }
+    }while(rc != SQLITE_DONE);
     
+    char* stringRetorno = formatResponse(status, sql_return, linecount-1, n);
+
+
+    for(i = 0; i < linecount - 1 ; i++){
+        for(collumncount = 0; collumncount < n; collumncount++){
+            free(sql_return[n*linecount+collumncount]);
+        }
+    }
+    free(sql_return);
+    status = sendResponse(stringRetorno, clientSocket);
+    sqlite3_finalize(stmt);
     sqlite3_close(db);
-    
-    return true;
+
+    end:
+        return status;
 }
 
 /*
@@ -238,9 +329,12 @@ bool listProfilesBasedOnEducation(char education[100]){
 -----------------------------------------
 */
 
-bool listProfilesBasedOnSkill(char skill[300]){
+bool listProfilesBasedOnSkill(char skill[300], int clientSocket){
+    bool status = true;
     sqlite3 *db;
+    char **sql_return;
     char *err_msg = 0;
+    int n, linecount, collumncount, i;
     
     int rc = sqlite3_open(server_path, &db);
     
@@ -257,10 +351,11 @@ bool listProfilesBasedOnSkill(char skill[300]){
     strcpy(sql, "SELECT * FROM Profiles_Skills, Profiles WHERE Profiles_Skills.Profile_Email = Profiles.Email AND Skill_Description == '");
     strcat(sql, skill);
     strcat(sql, "';");
+    sqlite3_stmt *stmt;
 
-        
-    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
-    
+    //rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+
+    rc = sqlite3_prepare_v2(db, sql, QUERY_MAX_SIZE, &stmt, (const char**)&err_msg);
     if (rc != SQLITE_OK ) {
         
         fprintf(stderr, "Failed to select data\n");
@@ -269,12 +364,51 @@ bool listProfilesBasedOnSkill(char skill[300]){
         sqlite3_free(err_msg);
         sqlite3_close(db);
         
-        return false;
-    } 
+        status = false;
+        goto end;
+    }
+
+    n = sqlite3_column_count(stmt);
+    if(n > MAX_COLUMN){
+        printf("Max collumn count reached\n");
+        status = false;
+        goto end;
+    }
+
+    linecount = 0;
+    sql_return = malloc(sizeof(char*)*MAX_LINE*MAX_COLUMN);
+    do{
+        rc = sqlite3_step(stmt);
+        
+        if (rc == SQLITE_ROW) {
+            for(collumncount = 0; collumncount < n; collumncount++){
+                sql_return[n*linecount+collumncount] = malloc(sizeof(char)*MAX_CARAC);
+                strcpy(sql_return[n*linecount+collumncount], (const char*)sqlite3_column_text(stmt, collumncount));
+            }
+        }
+
+        linecount++;
+        if(linecount == MAX_ROW){
+            printf("Max line count reached\n");
+            break;
+        }
+    }while(rc != SQLITE_DONE);
     
+    char* stringRetorno = formatResponse(status, sql_return, linecount-1, n);
+
+
+    for(i = 0; i < linecount - 1 ; i++){
+        for(collumncount = 0; collumncount < n; collumncount++){
+            free(sql_return[n*linecount+collumncount]);
+        }
+    }
+    free(sql_return);
+    status = sendResponse(stringRetorno, clientSocket);
+    sqlite3_finalize(stmt);
     sqlite3_close(db);
-    
-    return true;
+
+    end:
+        return status;
 }
 
 /*
@@ -283,9 +417,12 @@ bool listProfilesBasedOnSkill(char skill[300]){
 ---------------------------------------------------
 */
 
-bool listProfilesBasedOnGraduationYear(char graduationYear[4]){
+bool listProfilesBasedOnGraduationYear(char graduationYear[4], int clientSocket){
+    bool status = true;
     sqlite3 *db;
+    char **sql_return;
     char *err_msg = 0;
+    int n, linecount, collumncount, i;
     
     int rc = sqlite3_open(server_path, &db);
     
@@ -302,10 +439,11 @@ bool listProfilesBasedOnGraduationYear(char graduationYear[4]){
     strcpy(sql, "SELECT * FROM Profiles WHERE Graduation_Year == ");
     strcat(sql, graduationYear);
     strcat(sql, ";");
+    sqlite3_stmt *stmt;
 
-        
-    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
-    
+    //rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+
+    rc = sqlite3_prepare_v2(db, sql, QUERY_MAX_SIZE, &stmt, (const char**)&err_msg);
     if (rc != SQLITE_OK ) {
         
         fprintf(stderr, "Failed to select data\n");
@@ -314,12 +452,51 @@ bool listProfilesBasedOnGraduationYear(char graduationYear[4]){
         sqlite3_free(err_msg);
         sqlite3_close(db);
         
-        return false;
-    } 
+        status = false;
+        goto end;
+    }
+
+    n = sqlite3_column_count(stmt);
+    if(n > MAX_COLUMN){
+        printf("Max collumn count reached\n");
+        status = false;
+        goto end;
+    }
+
+    linecount = 0;
+    sql_return = malloc(sizeof(char*)*MAX_LINE*MAX_COLUMN);
+    do{
+        rc = sqlite3_step(stmt);
+        
+        if (rc == SQLITE_ROW) {
+            for(collumncount = 0; collumncount < n; collumncount++){
+                sql_return[n*linecount+collumncount] = malloc(sizeof(char)*MAX_CARAC);
+                strcpy(sql_return[n*linecount+collumncount], (const char*)sqlite3_column_text(stmt, collumncount));
+            }
+        }
+
+        linecount++;
+        if(linecount == MAX_ROW){
+            printf("Max line count reached\n");
+            break;
+        }
+    }while(rc != SQLITE_DONE);
     
+    char* stringRetorno = formatResponse(status, sql_return, linecount-1, n);
+
+
+    for(i = 0; i < linecount - 1 ; i++){
+        for(collumncount = 0; collumncount < n; collumncount++){
+            free(sql_return[n*linecount+collumncount]);
+        }
+    }
+    free(sql_return);
+    status = sendResponse(stringRetorno, clientSocket);
+    sqlite3_finalize(stmt);
     sqlite3_close(db);
-    
-    return true;
+
+    end:
+        return status;
 }
 
 /*
@@ -328,10 +505,13 @@ bool listProfilesBasedOnGraduationYear(char graduationYear[4]){
 ---------------------------------------
 */
 
-bool listAllProfiles(){
+bool listAllProfiles(int clientSocket){
 
+    bool status = true;
     sqlite3 *db;
+    char **sql_return;
     char *err_msg = 0;
+    int n, linecount, collumncount, i;
     
     int rc = sqlite3_open(server_path, &db);
     
@@ -341,13 +521,16 @@ bool listAllProfiles(){
                 sqlite3_errmsg(db));
         sqlite3_close(db);
         
-        return false;
+        status = false;
+        goto end;
     }
     
     char *sql = "SELECT * FROM Profiles";
-        
-    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
-    
+    sqlite3_stmt *stmt;
+
+    //rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+
+    rc = sqlite3_prepare_v2(db, sql, QUERY_MAX_SIZE, &stmt, (const char**)&err_msg);
     if (rc != SQLITE_OK ) {
         
         fprintf(stderr, "Failed to select data\n");
@@ -356,13 +539,50 @@ bool listAllProfiles(){
         sqlite3_free(err_msg);
         sqlite3_close(db);
         
-        return false;
-    } 
-    
-    sqlite3_close(db);
-    
-    return true;
+        status = false;
+        goto end;
+    }
 
+    n = sqlite3_column_count(stmt);
+    if(n > MAX_COLUMN){
+        printf("Max collumn count reached\n");
+        status = false;
+        goto end;
+    }
+
+    linecount = 0;
+    sql_return = malloc(sizeof(char*)*MAX_LINE*MAX_COLUMN);
+    do{
+        rc = sqlite3_step(stmt);
+        
+        if (rc == SQLITE_ROW) {
+            for(collumncount = 0; collumncount < n; collumncount++){
+                sql_return[n*linecount+collumncount] = malloc(sizeof(char)*MAX_CARAC);
+                strcpy(sql_return[n*linecount+collumncount], (const char*)sqlite3_column_text(stmt, collumncount));
+            }
+        }
+
+        linecount++;
+        if(linecount == MAX_ROW){
+            printf("Max line count reached\n");
+            break;
+        }
+    }while(rc != SQLITE_DONE);
+    
+    char* stringRetorno = formatResponse(status, sql_return, linecount-1, n);
+    for(i = 0; i < linecount - 1 ; i++){
+        for(collumncount = 0; collumncount < n; collumncount++){
+            free(sql_return[n*linecount+collumncount]);
+        }
+    }
+    free(sql_return);
+
+    status = sendResponse(stringRetorno, clientSocket);
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+
+    end:
+        return status;
 }
 
 /*
@@ -371,10 +591,12 @@ bool listAllProfiles(){
 ----------------------------------
 */
 
-bool readProfile(char *email){
-
+bool readProfile(char *email, int clientSocket){
+    bool status = true;
     sqlite3 *db;
+    char **sql_return;
     char *err_msg = 0;
+    int n, linecount, collumncount, i;
     
     int rc = sqlite3_open(server_path, &db);
     
@@ -391,10 +613,11 @@ bool readProfile(char *email){
     strcpy(sql, "SELECT * FROM Profiles WHERE Email == '");
     strcat(sql, email);
     strcat(sql, "';");
+    sqlite3_stmt *stmt;
 
-        
-    rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
-    
+    //rc = sqlite3_exec(db, sql, callback, 0, &err_msg);
+
+    rc = sqlite3_prepare_v2(db, sql, QUERY_MAX_SIZE, &stmt, (const char**)&err_msg);
     if (rc != SQLITE_OK ) {
         
         fprintf(stderr, "Failed to select data\n");
@@ -403,10 +626,51 @@ bool readProfile(char *email){
         sqlite3_free(err_msg);
         sqlite3_close(db);
         
-        return false;
-    } 
+        status = false;
+        goto end;
+    }
+
+    n = sqlite3_column_count(stmt);
+    if(n > MAX_COLUMN){
+        printf("Max collumn count reached\n");
+        status = false;
+        goto end;
+    }
+
+    linecount = 0;
+    sql_return = malloc(sizeof(char*)*MAX_LINE*MAX_COLUMN);
+    do{
+        rc = sqlite3_step(stmt);
+        
+        if (rc == SQLITE_ROW) {
+            for(collumncount = 0; collumncount < n; collumncount++){
+                sql_return[n*linecount+collumncount] = malloc(sizeof(char)*MAX_CARAC);
+                strcpy(sql_return[n*linecount+collumncount], (const char*)sqlite3_column_text(stmt, collumncount));
+            }
+        }
+
+        linecount++;
+        if(linecount == MAX_ROW){
+            printf("Max line count reached\n");
+            break;
+        }
+    }while(rc != SQLITE_DONE);
     
+    char* stringRetorno = formatResponse(status, sql_return, linecount-1, n);
+
+
+    for(i = 0; i < linecount - 1 ; i++){
+        for(collumncount = 0; collumncount < n; collumncount++){
+            free(sql_return[n*linecount+collumncount]);
+        }
+    }
+    free(sql_return);
+    status = sendResponse(stringRetorno, clientSocket);
+    sqlite3_finalize(stmt);
     sqlite3_close(db);
+
+    end:
+        return status;
     
     return true;
 }
@@ -417,7 +681,7 @@ bool readProfile(char *email){
 -------------------------------------
 */
 
-bool removeProfile(char *email){
+bool removeProfile(char *email, int clientSocket){
     
     sqlite3 *db;
     char *err_msg = 0;
@@ -453,9 +717,11 @@ bool removeProfile(char *email){
         return false;
     } 
     
+    char* response = formatResponse(true, NULL, 0, 0);
+
     sqlite3_close(db);
-    
-    return true;
+
+    return sendResponse(response, clientSocket);
 
 }
 
@@ -478,4 +744,113 @@ int callback(void *NotUsed, int argc, char **argv,
     printf("\n");
     
     return 0;
+}
+
+char* formatResponse(bool status, char** data, int lineCount, int collumnCount){
+    //Create JSON object
+    cJSON* profiles;
+    JSONquery query;
+
+    char *string = NULL;
+    
+
+    //WRAPPER
+    query.wrapper = cJSON_CreateObject();
+    if (query.wrapper == NULL){
+        goto end;
+    }
+    
+    //OPERATION
+    if(status == true){
+        query.operation = cJSON_CreateString("SUCCESS");
+    }else{
+        query.operation = cJSON_CreateString("FAILED");
+    }
+
+    if (query.operation == NULL){
+        goto end;
+    }
+    /* after creation was successful, immediately add it to the monitor,
+     * thereby transferring ownership of the pointer to it */
+    cJSON_AddItemToObject(query.wrapper, "response", query.operation);
+
+    //PROFILES OBJECT
+    if(data != NULL){
+        //adiciona vetor com stirngs
+        profiles = formatProfiles( data, lineCount, collumnCount);
+        if (profiles == NULL){
+            goto end;
+        }
+        cJSON_AddItemToObject(query.wrapper, "profiles", profiles);
+    }
+    
+    //JSONfy to string
+    string = cJSON_PrintUnformatted(query.wrapper);
+    if (string == NULL)
+    {
+        fprintf(stderr, "Objeto JSON não pôde ser exibido.\n");
+    }
+
+    if(0){
+        end:
+        printf("Falha ao criar o objeto JSON.\n");
+    }
+    
+    cJSON_Delete(query.wrapper);
+    return string; 
+}
+
+cJSON* formatProfiles(char** data, int lineCout, int collumnCount){
+        //Create JSON object
+    cJSON* Profiles =  cJSON_CreateArray();
+    JSONquery query;
+    int line, collumn;
+    char campo[15];
+
+    for(line = 0; line < lineCout; line++){
+
+        query.wrapper = cJSON_CreateObject();
+        if (query.wrapper == NULL){
+            goto end;
+        }
+        
+        
+        for(collumn = 0; collumn < collumnCount; collumn++){
+            switch(collumn){
+                case 0:
+                    strcpy(campo, "email");
+                    break;
+                case 1:
+                    strcpy(campo, "name");
+                    break;
+                case 2:
+                    strcpy(campo, "surname");
+                    break;
+                case 3:
+                    strcpy(campo, "address");
+                    break;
+                case 4:
+                    strcpy(campo, "education");
+                    break;
+                case 5:
+                    strcpy(campo, "graduationYear");
+                    break;
+            }
+            query.operation = cJSON_CreateString(data[line*collumnCount+collumn]);
+            if (query.operation == NULL){
+                goto end;
+            }
+            /* after creation was successful, immediately add it to the monitor,
+            * thereby transferring ownership of the pointer to it */
+            cJSON_AddItemToObject(query.wrapper, campo, query.operation);
+        }
+        if(0){
+            end:
+            printf("Falha ao criar o objeto JSON.\n");
+            break;
+        }
+        cJSON_AddItemToArray(Profiles, query.wrapper);
+    }
+
+    return Profiles;
 }
