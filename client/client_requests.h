@@ -295,7 +295,7 @@ bool listProfilesBasedOnGraduationYear(){
 
 bool list(){
 
-    char letter;
+    char letter = '0';
     int flag = 1;
     bool retorno = true;
     while(flag){
@@ -311,8 +311,14 @@ bool list(){
                 "   f. Cancelar e retornar ao menu principal\n"
                 "Digite o número da opção que deseja realizar: "
         );
+
+        input:
         scanf("%c", &letter);
+        if(letter=='\n'){
+            goto input;
+        }
         getchar();
+
         switch (letter)
         {
         case 'a'://ler perfil a partir de email

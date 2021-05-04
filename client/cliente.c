@@ -68,8 +68,14 @@ int main(int argc, char *argv[ ]){
                 "   6. Desconectar do servidor\n"
                 "Digite o número da opção que deseja realizar: "
         );
-        scanf("%c",&op);
+
+        input:
+        scanf("%c", &op);
+        if(op=='\n'){
+            goto input;
+        }
         getchar();
+        
         switch (op)
         {
         case '1'://criar novo usuário
