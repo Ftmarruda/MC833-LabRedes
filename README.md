@@ -62,6 +62,7 @@ Ou obtenha SQLite3 por meio do site [https://www.sqlite.org/index.html].
 ## Banco de Dados
 
 Criamos um banco de dados em arquivo utilizando SQLite3.
+
 Para visualizar o banco de dados, recomendamos a utilização do SQLiteStudio [https://sqlitestudio.pl].
 
 As tabelas são as seguintes:
@@ -101,7 +102,7 @@ Uma habilidade pode pertencer à mais de um perfil. Um perfil pode ter mais de u
 
 ## cJSON
 
-utilizamos a biblioteca cJSON para trabalhar com JSON dentro do C.
+Utilizamos a biblioteca cJSON para trabalhar com JSON dentro do C.
 
 ### JSONfier.h
 
