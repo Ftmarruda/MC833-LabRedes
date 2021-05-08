@@ -102,7 +102,7 @@ Uma habilidade pode pertencer à mais de um perfil. Um perfil pode ter mais de u
 
 ## cJSON
 
-utilizamos a biblioteca cJSON para trabalhar com JSON dentro do C.
+Utilizamos a biblioteca cJSON para trabalhar com JSON dentro do C.
 
 ### JSONfier.h
 
