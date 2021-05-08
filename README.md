@@ -62,6 +62,7 @@ Ou obtenha SQLite3 por meio do site [https://www.sqlite.org/index.html].
 ## Banco de Dados
 
 Criamos um banco de dados em arquivo utilizando SQLite3.
+
 Para visualizar o banco de dados, recomendamos a utilização do SQLiteStudio [https://sqlitestudio.pl].
 
 As tabelas são as seguintes:
