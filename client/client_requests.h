@@ -63,7 +63,7 @@ bool sendToServer(char* json){
         printf("Recv failed, error code %d\n", status);
         return false;
     }
-    printf("[JSONfier] RESPONSE IS: %s", response);
+    printf("RESPONSE IS: %s", response);
     bool retorno = parseServerMessage(response, status);
     free(response);
     //treat server response
