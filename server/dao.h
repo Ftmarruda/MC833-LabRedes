@@ -1,3 +1,8 @@
+/*
+    Neste arquivo definimos todas as funções de acesso ao banco de dados para realizar as opereções requisitadas pelos usuários. Após a operação no banco, as funções chamam
+    a função que manda um json de resposta ao cliente com o que foi processado pelo banco. O arquivo do banco é o app.db e seu caminho deve ser passado na execução do servidor.
+*/
+
 #include<sqlite3.h>
 #include<stdio.h>
 #include "../lib/cJSON.h"

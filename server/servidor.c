@@ -1,3 +1,8 @@
+/*
+    Este arquivo "liga" o servidor, setando a porta e o endereço ip. Após isso, conecta à um cliente e, à medida que mensagens são recebidas, direciona
+    essas mensagens à função que realiza o parse do json.
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>

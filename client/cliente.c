@@ -1,3 +1,7 @@
+/*
+    Arquivo inicial do cliente, que realiza a conexão ao servidor e apresenta um menu de operações ao usuário. Direciona as requisições às funções definidas e, client_requests.h
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>

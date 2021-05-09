@@ -1,12 +1,12 @@
 
 
-//Definição de constantes
+//Definição de constantes para padronizar as variáveis
 #define MAX_Name 31
 #define MAX_CARAC 140
 #define MAX_LINE 5000
 #define MAX_Year 5
 
-
+// Struct que será utilizado para a criação de um perfil
 typedef struct Profile {
     char email[31];
     char name[31];

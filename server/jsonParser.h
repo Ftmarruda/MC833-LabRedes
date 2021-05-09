@@ -1,3 +1,8 @@
+/*
+    Neste arquivo temos todo o tratamento de json pelo lado do servidor. A primeira função trata o Json e o direciona à uma das funções específicas para realizar operações 
+    no banco de dados.
+*/
+
 #include "../lib/cJSON.h"
 #include "../lib/profileTypes.h"
 #include "dao.h"
@@ -6,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-//Transforma as strings JSON em structs profile à serem passados para o banco de dados.
+
 
 bool parse(char* JSONstring, int clientSocket);
 bool parseCreate(const cJSON *JSONobject, int clientSocket);
@@ -19,6 +24,8 @@ bool parseListEducation(const cJSON *JSONobject, int clientSocket);
 bool parseListSkill(const cJSON *JSONobject, int clientSocket);
 bool parseListYear(const cJSON *JSONobject, int clientSocket);
 
+
+//Transforma as strings JSON em structs profile à serem passados para o banco de dados.
 bool parse(char* JSONstring, int clientSocket){
 
     const cJSON *operation = NULL;

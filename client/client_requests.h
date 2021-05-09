@@ -1,4 +1,5 @@
-
+// Aqui estão definidas as funções que leem informações que os clientes desejam requisitar ao servidor. Todas as funções tratam essas informações para Json com auxilio 
+//  do  arquivo JSONfier_client e enviam as requisições com a função sendToServer().
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
